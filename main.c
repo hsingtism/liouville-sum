@@ -27,7 +27,7 @@ int liouvFrag(unsigned long long seed)
 int main()
 {
     long liouvSum = 0;
-    for (unsigned long long i = 1; i < 18446744073709551614; i++)
+    for (unsigned long long i = 1; i < 9223372036854775807; i++)
     {
         liouvSum += liouvFrag(i);
         // printf("%lu: %ld\n",i,liouvSum);
