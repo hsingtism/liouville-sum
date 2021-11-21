@@ -1,0 +1,51 @@
+//first
+int liouvFrag(long seed){
+    int pfCount = 0; 
+    int divis = 2;
+    while (divis <= seed) {
+        if (seed%divis == 0) {
+            pfCount++;
+            seed /= divis;
+            divis = 1; //because divis++
+        }      
+        divis++;
+    }
+    return 1 - (pfCount%2)*2;
+}
+
+//only check first half
+int liouvFrag(long seed){
+    int pfCount = 0; 
+    int divis = 1;
+    while (divis * 2 <= seed) {
+        if (seed%divis == 0) {
+            pfCount++;
+            seed /= divis;
+            divis = 1; //because divis++
+        }      
+        divis++;
+    }
+    return 1 - (pfCount%2)*2;
+}
+
+//checks up to sqrt - 30mil in about 39 sec - 3 mil in 1 sec 
+int liouvFrag(long seed)
+{
+    int pfCount = 0;
+    while (seed % 2 == 0) {
+        pfCount++;
+        seed = seed >> 1;
+    }
+    for (long divis = 3; divis * divis <= seed; divis = divis + 2) {
+        while (seed % divis == 0) {
+            pfCount++;
+            seed /= divis;
+        }
+    }
+    if (seed > 2)
+    {
+        pfCount++;
+    }
+    
+    return 1 - (pfCount % 2) * 2;
+}
