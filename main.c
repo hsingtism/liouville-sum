@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <math.h>
+#include <time.h>
 // #include <stdint.h>
 
 int liouvFrag(unsigned long long seed)
@@ -26,13 +27,17 @@ int liouvFrag(unsigned long long seed)
 int main()
 {
     long liouvSum = 0;
-    for (unsigned long long i = 1; i < 10000000; i++)
+    for (unsigned long long i = 1; i < 18446744073709551614; i++)
     {
         liouvSum += liouvFrag(i);
         // printf("%lu: %ld\n",i,liouvSum);
-        if (liouvSum == 0 || i % 1000000 == 0)
+        if (liouvSum == 0 || i % 10000000 == 0)
         {
             printf("%lu: %ld\n", i, liouvSum);
+            FILE * fp;
+            fp = fopen("computed.txt","a");
+            fprintf(fp, "%lu - %lu: %ld\n", (unsigned long)time(NULL), i, liouvSum);
+            fclose(fp);
         }
     }
     return 0;
