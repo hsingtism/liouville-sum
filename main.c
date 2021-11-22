@@ -3,13 +3,12 @@
 #include <time.h>
 // #include <stdint.h>
 
-int liouvFrag(unsigned long long seed)
+long liouvFrag(unsigned long long seed) //since running count uses long
 {
-    int pfCount = 0;
-    while (seed % 2 == 0) {
-        pfCount++;
-        seed = seed >> 1;
-    }
+    char pfCount = 0;
+    int tz = __builtin_ctz(seed); //ctz returns int so
+    pfCount += tz;
+    seed = seed >> tz;
     for (unsigned long divis = 3; divis <= sqrt(seed); divis = divis + 2) { //it's faster to call sqrt() than squre a 128uint 
         while (seed % divis == 0) {
             pfCount++;
@@ -20,7 +19,6 @@ int liouvFrag(unsigned long long seed)
     {
         pfCount++;
     }
-
     return 1 - (pfCount % 2) * 2;
 }
 
