@@ -3,6 +3,12 @@
 #include <time.h>
 // #include <stdint.h>
 
+//define starting para
+const long startingSum = 0; //log file or 0
+const unsigned long long startingN = 587; //log file **PLUS 1** or 1 
+const unsigned long long endingN = 30000000; //default is 9223372036854775807
+const unsigned long long printIntv = 10000000; //default is 10000000
+
 long liouvFrag(unsigned long long seed) //since running count uses long
 {
     char pfCount = 0;
@@ -40,12 +46,11 @@ long liouvFrag(unsigned long long seed) //since running count uses long
 
 int main()
 {
-    long liouvSum = 0;
-    for (unsigned long long i = 1; i < 9223372036854775807; i++)
+    long liouvSum = startingSum;
+    for (unsigned long long i = startingN; i < endingN; i++)
     {
         liouvSum += liouvFrag(i);
-        // printf("%lu: %ld\n",i,liouvSum);
-        if (liouvSum == 0 || i % 10000000 == 0)
+        if (liouvSum == 0 || i % printIntv == 0)
         {
             printf("%lu: %ld\n", i, liouvSum);
             FILE *fp;
