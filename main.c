@@ -4,9 +4,9 @@
 // #include <stdint.h>
 
 //define starting para
+const unsigned long long startingN = 1; //log file **PLUS 1** or 1 
 const long startingSum = 0; //log file or 0
-const unsigned long long startingN = 587; //log file **PLUS 1** or 1 
-const unsigned long long endingN = 30000000; //default is 9223372036854775807
+const unsigned long long endingN = 9223372036854775807; //default is 9223372036854775807
 const unsigned long long printIntv = 10000000; //default is 10000000
 
 long liouvFrag(unsigned long long seed) //since running count uses long
@@ -52,10 +52,10 @@ int main()
         liouvSum += liouvFrag(i);
         if (liouvSum == 0 || i % printIntv == 0)
         {
-            printf("%lu: %ld\n", i, liouvSum);
+            printf("%llu: %ld\n", i, liouvSum);
             FILE *fp;
             fp = fopen("computed.txt", "a");
-            fprintf(fp, "%lu - %lu: %ld\n", (unsigned long)time(NULL), i, liouvSum);
+            fprintf(fp, "%llu - %lu: %ld\n", (unsigned long)time(NULL), i, liouvSum);
             fclose(fp);
         }
     }
