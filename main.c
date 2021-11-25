@@ -4,8 +4,8 @@
 // #include <stdint.h>
 
 //define starting para
-const unsigned long long startingN = 4280000001; //log file **PLUS 1** or 1 
-const long startingSum = -57378; //log file or 0
+const unsigned long long startingN = 1; //log file **PLUS 1** or 1 
+const long startingSum = 0; //log file or 0
 const unsigned long long endingN = 9223372036854775807; //default is 9223372036854775807
 const unsigned long long printIntv = 10000000; //default is 10000000
 
