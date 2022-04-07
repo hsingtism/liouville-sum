@@ -1,12 +1,12 @@
 #include <math.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <time.h>
-#include <stdint.h>
 
 // define starting para
 #define startingN 1                  // log file **PLUS 1** or 1
 #define startingSum 0                // log file or 0
-#define endingN 9223372036854775807  // default is 9223372036854775807
+#define endingN 9007199254740991     // default is 9007199254740991 - max value for double to behave
 #define printIntv 10000000           // default is 10000000
 
 long liouvFrag(uint64_t seed) {
