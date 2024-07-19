@@ -7,7 +7,7 @@
 #define startingN 1                  // log file **PLUS 1** or 1
 #define startingSum 0                // log file or 0
 #define endingN 9007199254740991     // default is 9007199254740991 - max value for double to behave
-#define printIntv 10000000           // default is 10000000
+#define printIntv 30000           // default is 10000000
 
 long liouvFrag(uint64_t seed) {
     char pfCount = 0;
