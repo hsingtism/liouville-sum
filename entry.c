@@ -4,13 +4,16 @@
 
 // 8! because it is the size of modern CPU caches and the value is almost 16 bits
 #define TABLE_FACTORIAL_BASE 8
-#define TABLE_SIZE 40320
+#define HEAD_TABLE_SIZE 40320
 
-void generateLookupTable(uint16_t* divisorTable, uint8_t* oddFactorCount) {
+// purely arbitrary
+#define TAIL_TABLE_SIZE 1000000
+
+void generateHeadTable(uint16_t* divisorTable, uint8_t* oddFactorCount) {
     divisorTable[0] = 1;
     oddFactorCount[0] = 0;
 
-    for(uint16_t i = 1; i < TABLE_SIZE; i++) {
+    for(uint16_t i = 1; i < HEAD_TABLE_SIZE; i++) {
         uint16_t workingI = i;
         
         uint16_t divisor = 1;
@@ -75,10 +78,16 @@ uint64_t liouvilleBlock(uint64_t starting) {
 
 int main() {
 
-    uint16_t firstDivisorTable[TABLE_SIZE];
-    uint8_t tableOddFactor[TABLE_SIZE];
+    uint16_t headTableDivisor[HEAD_TABLE_SIZE];
+    uint8_t headTableFactor[HEAD_TABLE_SIZE];
 
-    generateLookupTable(firstDivisorTable, tableOddFactor);
+    generateHeadTable(headTableDivisor, headTableFactor);
+
+    uint64_t tailTable[TAIL_TABLE_SIZE];
+
+    tailTable[0] = liouvilleBlock(0);
+
+    // TODO lookup in tail tables here
 
     int32_t sum = -1; // start at -1 to account for liouville_full(0)
     // for(uint16_t i = 0; i < 1563; i++) {
@@ -88,7 +97,7 @@ int main() {
 
     for(uint32_t i = 1; i < 100000000; i++) {
         // sum += liouville_full(i);
-        // sum += applyLookUpTable(i, i % TABLE_SIZE, firstDivisorTable, tableOddFactor);
+        // sum += applyLookUpTable(i, i % HEAD_TABLE_SIZE, headTableDivisor, headTableFactor);
     }
     printf("%u\n", sum);
 
