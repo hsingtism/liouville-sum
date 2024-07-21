@@ -40,6 +40,14 @@ uint8_t liouvilleLookup(uint64_t n, uint64_t* tailTable, uint16_t* divisorTable,
     const uint64_t initial = n;
     uint8_t factorCount = 0;
 
+    const uint16_t trailingZeroCount = __builtin_ctz(n);
+    factorCount ^= trailingZeroCount & 1;
+    n = n >> trailingZeroCount;
+
+    if(n < initial && n < TAIL_TABLE_SIZE * 64) {
+        return factorCount ^ (uint8_t)(tailTable[n / 64] >> (n % 64)) & 1;
+    }
+
     factorCount ^= oddFactorCount[n % HEAD_TABLE_SIZE];
     n /= divisorTable[n % HEAD_TABLE_SIZE];
 
@@ -47,23 +55,11 @@ uint8_t liouvilleLookup(uint64_t n, uint64_t* tailTable, uint16_t* divisorTable,
         return factorCount ^ (uint8_t)(tailTable[n / 64] >> (n % 64)) & 1;
     }
 
-    // return liouville_full(n) ^ factorCount;
-
-    uint16_t trailingZeroCount = __builtin_ctz(n);
-    factorCount ^= trailingZeroCount & 1;
-    n = n >> trailingZeroCount;
-
-    // TODO don't repeat this
-    if(n < initial && n < TAIL_TABLE_SIZE * 64) {
-        return factorCount ^ (uint8_t)((tailTable[n / 64] >> (n % 64)) & 1);
-    }
-
     while(n % 3 == 0) {
         factorCount ^= 1;
         n /= 3;
     }
     
-    // ! here
     if(n < initial && n < TAIL_TABLE_SIZE * 64) {
         return factorCount ^ (uint8_t)((tailTable[n / 64] >> (n % 64)) & 1);
     }
@@ -74,7 +70,6 @@ uint8_t liouvilleLookup(uint64_t n, uint64_t* tailTable, uint16_t* divisorTable,
             n /= div - 1;
         }
 
-        // ! here
         if(n < initial && n < TAIL_TABLE_SIZE * 64) {
             return factorCount ^ (uint8_t)((tailTable[n / 64] >> (n % 64)) & 1);
         }
@@ -84,7 +79,6 @@ uint8_t liouvilleLookup(uint64_t n, uint64_t* tailTable, uint16_t* divisorTable,
             n /= div + 1;
         }
 
-        // ! here
         if(n < initial && n < TAIL_TABLE_SIZE * 64) {
             return factorCount ^ (uint8_t)((tailTable[n / 64] >> (n % 64)) & 1);
         }
@@ -119,8 +113,7 @@ int main() {
     sum += __builtin_popcountll(tailTable[0]) * -2 + 64;
     
 
-    // for(uint32_t i = 1; i < 1562500; i++) {
-    for(uint32_t i = 1; i < 156250; i++) {
+    for(uint64_t i = 1; ; i++) {
         uint64_t block = liouvilleBlockLookup(i * 64, tailTable, headTableDivisor, headTableFactor);
         sum += __builtin_popcountll(block) * -2 + 64;
 
@@ -128,8 +121,8 @@ int main() {
             tailTable[i] = block;
         }
 
-        if(i % 8192 == 0) {
-            printf("%u %d\n", i * 64 + 63, sum);
+        if((i - 1) % (1 << 13) == 0 || abs(sum) < 128) {
+            printf("%lu %d %lx\n", i * 64 + 63, sum, block);
         }
 
     }
