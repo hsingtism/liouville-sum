@@ -16,9 +16,13 @@
 
 #define CPU_COUNT 16
 
-void generateHeadTable(uint16_t* divisorTable, uint8_t* oddFactorCount) {
-    divisorTable[0] = HEAD_TABLE_SIZE;
-    oddFactorCount[0] = 1; // liouville_full(HEAD_TABLE_SIZE) is 1
+uint16_t* headTableDivisor;
+uint8_t* headTableFactor;
+uint64_t* tailTable;
+
+void generateHeadTable() {
+    headTableDivisor[0] = HEAD_TABLE_SIZE;
+    headTableFactor[0] = 1; // liouville_full(HEAD_TABLE_SIZE) is 1
 
     for(uint16_t i = 1; i < HEAD_TABLE_SIZE; i++) {
         uint16_t workingI = i;
@@ -34,12 +38,12 @@ void generateHeadTable(uint16_t* divisorTable, uint8_t* oddFactorCount) {
             }
         }
 
-        oddFactorCount[i] = factors;
-        divisorTable[i] = divisor;
+        headTableFactor[i] = factors;
+        headTableDivisor[i] = divisor;
     }
 }
 
-uint8_t liouvilleLookup(uint64_t n, uint64_t* tailTable, uint16_t* divisorTable, uint8_t* oddFactorCount) {
+uint8_t liouvilleLookup(uint64_t n) {
     
     const uint64_t initial = n;
     uint8_t factorCount = 0;
@@ -52,8 +56,8 @@ uint8_t liouvilleLookup(uint64_t n, uint64_t* tailTable, uint16_t* divisorTable,
         return factorCount ^ (uint8_t)(tailTable[n / 64] >> (n % 64)) & 1;
     }
 
-    factorCount ^= oddFactorCount[n % HEAD_TABLE_SIZE];
-    n /= divisorTable[n % HEAD_TABLE_SIZE];
+    factorCount ^= headTableFactor[n % HEAD_TABLE_SIZE];
+    n /= headTableDivisor[n % HEAD_TABLE_SIZE];
 
     if(n < initial && n < TAIL_TABLE_SIZE * 64) {
         return factorCount ^ (uint8_t)(tailTable[n / 64] >> (n % 64)) & 1;
@@ -95,35 +99,43 @@ uint8_t liouvilleLookup(uint64_t n, uint64_t* tailTable, uint16_t* divisorTable,
     return factorCount;
 }
 
-uint64_t liouvilleBlockLookup(uint64_t starting, uint64_t* tailTable, uint16_t* divisorTable, uint8_t* oddFactorCount) {
+uint64_t liouvilleBlockLookup(uint64_t starting) {
     uint64_t block = 0;
     for(uint64_t i = 0; i < 64; i++) {
-        block ^= (uint64_t)liouvilleLookup(starting + i, tailTable, divisorTable, oddFactorCount) << i;
+        block ^= (uint64_t)liouvilleLookup(starting + i) << i;
     }
     
     return block;
 }
 
-void threadJob(uint64_t starting, uint32_t blockCount, uint32_t* sum) {
+// void threadJob(uint64_t starting, uint32_t blockCount, uint32_t* sum) {
+//     for(uint64_t i = 0; i < blockCount; i++) {
+//         uint64_t block = liouvilleBlockLookup(i * 64, tailTable, headTableDivisor, headTableFactor);
+//         sum += __builtin_popcountll(block) * -2 + 64;
 
-}
+//         if(i < TAIL_TABLE_SIZE) {
+//             tailTable[i] = block;
+//         }
+//     }
+// }
 
 int main() {
 
     int32_t sum = -1; // start at -1 to account for liouville_full(0)
     
-    uint16_t headTableDivisor[HEAD_TABLE_SIZE];
-    uint8_t headTableFactor[HEAD_TABLE_SIZE];
-    generateHeadTable(headTableDivisor, headTableFactor);
+    headTableDivisor = malloc(HEAD_TABLE_SIZE * sizeof(uint16_t));
+    headTableFactor = malloc(HEAD_TABLE_SIZE * sizeof(uint8_t));
+    generateHeadTable();
 
-    uint64_t* tailTable = malloc(TAIL_TABLE_SIZE * sizeof(uint64_t));
+    tailTable = malloc(TAIL_TABLE_SIZE * sizeof(uint64_t));
+    
     tailTable[0] = TAIL_TABLE_FIRST_ENTRY;
     sum += __builtin_popcountll(tailTable[0]) * -2 + 64;
     
     
 
     for(uint64_t i = 1; ; i++) {
-        uint64_t block = liouvilleBlockLookup(i * 64, tailTable, headTableDivisor, headTableFactor);
+        uint64_t block = liouvilleBlockLookup(i * 64);
         sum += __builtin_popcountll(block) * -2 + 64;
 
         if(i < TAIL_TABLE_SIZE) {
