@@ -32,7 +32,6 @@ void generateHeadTable(uint16_t* divisorTable, uint8_t* oddFactorCount) {
 
         oddFactorCount[i] = factors;
         divisorTable[i] = divisor;
-        // printf("%u %u %u ;;", i, factors, divisor);
     }
 }
 
@@ -41,7 +40,6 @@ uint8_t liouvilleLookup(uint64_t n, uint64_t* tailTable, uint16_t* divisorTable,
     const uint64_t initial = n;
     uint8_t factorCount = 0;
 
-    // ! do not switch these two statements
     factorCount ^= oddFactorCount[n % HEAD_TABLE_SIZE];
     n /= divisorTable[n % HEAD_TABLE_SIZE];
 
@@ -116,17 +114,13 @@ int main() {
     uint8_t headTableFactor[HEAD_TABLE_SIZE];
     generateHeadTable(headTableDivisor, headTableFactor);
 
-    // TODO use malloc
-    // uint64_t tailTable[TAIL_TABLE_SIZE];
-
     uint64_t* tailTable = malloc(TAIL_TABLE_SIZE * sizeof(uint64_t));
-
     tailTable[0] = TAIL_TABLE_FIRST_ENTRY;
     sum += __builtin_popcountll(tailTable[0]) * -2 + 64;
     
 
-    for(uint32_t i = 1; i < 1562500; i++) {
-    // for(uint32_t i = 1; i < 15; i++) {
+    // for(uint32_t i = 1; i < 1562500; i++) {
+    for(uint32_t i = 1; i < 156250; i++) {
         uint64_t block = liouvilleBlockLookup(i * 64, tailTable, headTableDivisor, headTableFactor);
         sum += __builtin_popcountll(block) * -2 + 64;
 
@@ -140,21 +134,6 @@ int main() {
 
     }
 
-
-    // for(uint16_t i = 0; i < 10; i++) {
-    // for(uint16_t i = 64; i < 84; i++) {
-
-        // printf("%u %ld\n", i, liouvilleLookup(i, tailTable, headTableDivisor, headTableFactor));
-        
-
-        // sum += __builtin_popcountll(liouvilleBlock(i * 64)) * -2 + 64;
-        // printf("%u %ld\n", i * 64 + 63, sum);
-    // }
-
-    // for(uint32_t i = 1; i < 100000000; i++) {
-        // sum += liouville_full(i);
-        // sum += applyLookUpTable(i, i % HEAD_TABLE_SIZE, headTableDivisor, headTableFactor);
-    // }
     printf("%d\n", sum);
 
     return 0;
