@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <math.h>
 
+#include <pthread.h>
+
 // 8! because it is the size of modern CPU caches and the value is almost 16 bits
 // ! do not edit
 #define TABLE_FACTORIAL_BASE 8
@@ -11,6 +13,8 @@
 // purely arbitrary
 #define TAIL_TABLE_SIZE 10000000
 #define TAIL_TABLE_FIRST_ENTRY 0xa835be21f89e39ac // see tailTableForstEntry.c
+
+#define CPU_COUNT 16
 
 void generateHeadTable(uint16_t* divisorTable, uint8_t* oddFactorCount) {
     divisorTable[0] = HEAD_TABLE_SIZE;
@@ -100,6 +104,10 @@ uint64_t liouvilleBlockLookup(uint64_t starting, uint64_t* tailTable, uint16_t* 
     return block;
 }
 
+void threadJob(uint64_t starting, uint32_t blockCount, uint32_t* sum) {
+
+}
+
 int main() {
 
     int32_t sum = -1; // start at -1 to account for liouville_full(0)
@@ -111,6 +119,7 @@ int main() {
     uint64_t* tailTable = malloc(TAIL_TABLE_SIZE * sizeof(uint64_t));
     tailTable[0] = TAIL_TABLE_FIRST_ENTRY;
     sum += __builtin_popcountll(tailTable[0]) * -2 + 64;
+    
     
 
     for(uint64_t i = 1; ; i++) {
