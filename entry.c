@@ -20,29 +20,6 @@ uint16_t* headTableDivisor;
 uint8_t* headTableFactor;
 uint64_t* tailTable;
 
-void generateHeadTable() {
-    headTableDivisor[0] = HEAD_TABLE_SIZE;
-    headTableFactor[0] = 1; // liouville_full(HEAD_TABLE_SIZE) is 1
-
-    for(uint16_t i = 1; i < HEAD_TABLE_SIZE; i++) {
-        uint16_t workingI = i;
-        
-        uint16_t divisor = 1;
-        uint8_t factors = 0;
-
-        for(uint8_t d = 2; d < TABLE_FACTORIAL_BASE; d++) {
-            if(d == 4 || d == 6) continue; // primes only
-            if(workingI % d == 0) {
-                divisor *= d;
-                factors ^= 1;
-            }
-        }
-
-        headTableFactor[i] = factors;
-        headTableDivisor[i] = divisor;
-    }
-}
-
 uint8_t liouvilleLookup(uint64_t n) {
     
     const uint64_t initial = n;
@@ -100,6 +77,10 @@ uint8_t liouvilleLookup(uint64_t n) {
 }
 
 uint64_t liouvilleBlockLookup(uint64_t starting) {
+    if(starting == 0) {
+        return TAIL_TABLE_FIRST_ENTRY;
+    }
+
     uint64_t block = 0;
     for(uint64_t i = 0; i < 64; i++) {
         block ^= (uint64_t)liouvilleLookup(starting + i) << i;
@@ -112,20 +93,12 @@ uint64_t liouvilleBlockLookup(uint64_t starting) {
 // TODO multithread here
 void fillBuffer(uint64_t* data, uint64_t startingBlock, uint32_t blockCount, uint8_t spawnThreads) {
     for(uint64_t i = 0; i < blockCount; i++) {
+        const uint64_t absolutePosition = startingBlock + i;
 
-        // special case for first entry
-        if (startingBlock + i == 0) {
-            tailTable[0] = TAIL_TABLE_FIRST_ENTRY;
-            data[i] = TAIL_TABLE_FIRST_ENTRY;
-            continue;
-        }
-
-        uint64_t block = liouvilleBlockLookup((startingBlock + i) * 64);
-        
+        uint64_t block = liouvilleBlockLookup(absolutePosition * 64);        
         data[i] = block;
-
-        if(startingBlock + i < TAIL_TABLE_SIZE) {
-            tailTable[startingBlock + i] = block;
+        if(absolutePosition < TAIL_TABLE_SIZE) {
+            tailTable[absolutePosition] = block;
         }
     }
 }
@@ -133,10 +106,31 @@ void fillBuffer(uint64_t* data, uint64_t startingBlock, uint32_t blockCount, uin
 int main() {
 
     int32_t sum = -1; // start at -1 to account for liouville_full(0)
+
     
     headTableDivisor = malloc(HEAD_TABLE_SIZE * sizeof(uint16_t));
     headTableFactor = malloc(HEAD_TABLE_SIZE * sizeof(uint8_t));
-    generateHeadTable();
+    
+    headTableDivisor[0] = HEAD_TABLE_SIZE;
+    headTableFactor[0] = 1; // liouville_full(HEAD_TABLE_SIZE) is 1
+
+    for(uint16_t i = 1; i < HEAD_TABLE_SIZE; i++) {
+        uint16_t workingI = i;
+        
+        uint16_t divisor = 1;
+        uint8_t factors = 0;
+
+        for(uint8_t d = 2; d < TABLE_FACTORIAL_BASE; d++) {
+            if(d == 4 || d == 6) continue; // primes only
+            if(workingI % d) continue;
+            divisor *= d;
+            factors ^= 1;
+        }
+
+        headTableFactor[i] = factors;
+        headTableDivisor[i] = divisor;
+    }
+
 
     tailTable = malloc(TAIL_TABLE_SIZE * sizeof(uint64_t));
 
