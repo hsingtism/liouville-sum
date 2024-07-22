@@ -5,8 +5,7 @@
 
 #include <pthread.h>
 
-// 8! because it is the size of modern CPU caches and the value is almost 16 bits
-// ! do not edit
+// ! do not edit or you might break something
 #define TABLE_FACTORIAL_BASE 8
 #define HEAD_TABLE_SIZE 40320
 
@@ -148,9 +147,7 @@ void fillBuffer(uint64_t* data, uint64_t startingBlock, uint32_t blockCount, uin
 }
 
 int main() {
-
-    int32_t sum = -1; // start at -1 to account for liouville_full(0)
-
+    tailTable = malloc(TAIL_TABLE_SIZE * sizeof(uint64_t));
     
     headTableDivisor = malloc(HEAD_TABLE_SIZE * sizeof(uint16_t));
     headTableFactor = malloc(HEAD_TABLE_SIZE * sizeof(uint8_t));
@@ -176,20 +173,15 @@ int main() {
     }
 
 
-    tailTable = malloc(TAIL_TABLE_SIZE * sizeof(uint64_t));
+    int32_t sum = -1; // start at -1 to account for liouville_full(0)
+    uint64_t blockCount = 0;
 
-    // the program will run singlethreaded for the first CPU_COUNT
-    // so for small jobs set this value smaller
     const uint32_t bufferChunkSize = CPU_COUNT * 16384;
     uint64_t* aggregationBuffer = malloc(bufferChunkSize * sizeof(uint64_t)); 
 
-    uint64_t blockCount = 0;
-
-    for(uint64_t i = 0; ; i++) {
-        
-        // refill the buffer
+    for(uint64_t i = 0; ; i++) {        
         if(i % bufferChunkSize == 0) {
-            //                       cannot multithread on first round because table isn't built
+            // cannot multithread on first round because table isn't built
             fillBuffer(aggregationBuffer, i, bufferChunkSize, i != 0);
             blockCount++;
 
@@ -197,8 +189,6 @@ int main() {
                 blockCount, bufferChunkSize * 64, i != 0, (intmax_t)time(NULL));
         }
 
-        // the counting process is extremely fast so no need to buffer swap 
-        // or multithread this part in any way... yet
         uint64_t block = aggregationBuffer[i % bufferChunkSize];
         sum += __builtin_popcountll(block) * -2 + 64;
 
@@ -206,9 +196,6 @@ int main() {
             printf("%lu %d %lx\n", i * 64 + 63, sum, block);
         }
     }
-
-    
-    printf("%d\n", sum);
 
     free(aggregationBuffer);
     free(headTableDivisor);
