@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <math.h>
 
-// #include <pthread.h>
+#include <pthread.h>
 
 // 8! because it is the size of modern CPU caches and the value is almost 16 bits
 // ! do not edit
@@ -89,9 +89,53 @@ uint64_t liouvilleBlockLookup(uint64_t starting) {
     return block;
 }
 
+struct ThreadData {
+    uint64_t* data;
+    uint32_t arrayOffset;
+    uint64_t startingBlock;
+    uint32_t blockCount;
+};
+
+void* threadRoutine(void* arguments) {
+    struct ThreadData args = *(struct ThreadData*) arguments;
+    
+    for(uint64_t i = 0; i < args.blockCount; i++) {
+        const uint64_t absolutePosition = args.startingBlock + i;
+        
+        uint64_t block = liouvilleBlockLookup(absolutePosition * 64);
+        args.data[i + args.arrayOffset] = block;
+        if(absolutePosition < TAIL_TABLE_SIZE) {
+            tailTable[absolutePosition] = block;
+        }
+    }
+}
+
+
 // blockSize must be a multiple of CPU_COUNT
 // TODO multithread here
 void fillBuffer(uint64_t* data, uint64_t startingBlock, uint32_t blockCount, uint8_t spawnThreads) {
+
+    if(spawnThreads) {
+        pthread_t threads[CPU_COUNT];
+        struct ThreadData threadData[CPU_COUNT];
+
+        const uint32_t blocksPerThread = blockCount / CPU_COUNT;
+
+        for(uint16_t i = 0; i < CPU_COUNT; i++) {
+            threadData[i].startingBlock = startingBlock + blocksPerThread * i;
+            threadData[i].blockCount = blocksPerThread;
+            threadData[i].data = data;
+            threadData[i].arrayOffset = blocksPerThread * i;
+            pthread_create(&threads[i], NULL, threadRoutine, &threadData[i]);
+        }
+
+        for(uint16_t i = 0; i < CPU_COUNT; i++) {
+            pthread_join(threads[i], NULL);
+        }
+
+        return;
+    }
+
     for(uint64_t i = 0; i < blockCount; i++) {
         const uint64_t absolutePosition = startingBlock + i;
 
@@ -134,16 +178,27 @@ int main() {
 
     tailTable = malloc(TAIL_TABLE_SIZE * sizeof(uint64_t));
 
+    // the program will run singlethreaded for the first CPU_COUNT
+    // so for small jobs set this value smaller
     const uint32_t bufferChunkSize = CPU_COUNT * 16384;
     uint64_t* aggregationBuffer = malloc(bufferChunkSize * sizeof(uint64_t)); 
+
+    uint64_t blockCount = 0;
 
     for(uint64_t i = 0; ; i++) {
         
         // refill the buffer
         if(i % bufferChunkSize == 0) {
+            //                       cannot multithread on first round because table isn't built
             fillBuffer(aggregationBuffer, i, bufferChunkSize, i != 0);
+            blockCount++;
+
+            printf("block %lu with %u values fulfilled. multithreaded: %u. current time: %jd\n",
+                blockCount, bufferChunkSize * 64, i != 0, (intmax_t)time(NULL));
         }
 
+        // the counting process is extremely fast so no need to buffer swap 
+        // or multithread this part in any way... yet
         uint64_t block = aggregationBuffer[i % bufferChunkSize];
         sum += __builtin_popcountll(block) * -2 + 64;
 
