@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <math.h>
 
-#include <pthread.h>
+// #include <pthread.h>
 
 // 8! because it is the size of modern CPU caches and the value is almost 16 bits
 // ! do not edit
@@ -108,16 +108,27 @@ uint64_t liouvilleBlockLookup(uint64_t starting) {
     return block;
 }
 
-// void threadJob(uint64_t starting, uint32_t blockCount, uint32_t* sum) {
-//     for(uint64_t i = 0; i < blockCount; i++) {
-//         uint64_t block = liouvilleBlockLookup(i * 64, tailTable, headTableDivisor, headTableFactor);
-//         sum += __builtin_popcountll(block) * -2 + 64;
+// blockSize must be a multiple of CPU_COUNT
+// TODO multithread here
+void fillBuffer(uint64_t* data, uint64_t startingBlock, uint32_t blockCount, uint8_t spawnThreads) {
+    for(uint64_t i = 0; i < blockCount; i++) {
 
-//         if(i < TAIL_TABLE_SIZE) {
-//             tailTable[i] = block;
-//         }
-//     }
-// }
+        // special case for first entry
+        if (startingBlock + i == 0) {
+            tailTable[0] = TAIL_TABLE_FIRST_ENTRY;
+            data[i] = TAIL_TABLE_FIRST_ENTRY;
+            continue;
+        }
+
+        uint64_t block = liouvilleBlockLookup((startingBlock + i) * 64);
+        
+        data[i] = block;
+
+        if(startingBlock + i < TAIL_TABLE_SIZE) {
+            tailTable[startingBlock + i] = block;
+        }
+    }
+}
 
 int main() {
 
@@ -128,27 +139,32 @@ int main() {
     generateHeadTable();
 
     tailTable = malloc(TAIL_TABLE_SIZE * sizeof(uint64_t));
-    
-    tailTable[0] = TAIL_TABLE_FIRST_ENTRY;
-    sum += __builtin_popcountll(tailTable[0]) * -2 + 64;
-    
-    
 
-    for(uint64_t i = 1; ; i++) {
-        uint64_t block = liouvilleBlockLookup(i * 64);
+    const uint32_t bufferChunkSize = CPU_COUNT * 16384;
+    uint64_t* aggregationBuffer = malloc(bufferChunkSize * sizeof(uint64_t)); 
+
+    for(uint64_t i = 0; ; i++) {
+        
+        // refill the buffer
+        if(i % bufferChunkSize == 0) {
+            fillBuffer(aggregationBuffer, i, bufferChunkSize, i != 0);
+        }
+
+        uint64_t block = aggregationBuffer[i % bufferChunkSize];
         sum += __builtin_popcountll(block) * -2 + 64;
 
-        if(i < TAIL_TABLE_SIZE) {
-            tailTable[i] = block;
-        }
-
-        if((i - 1) % (1 << 13) == 0 || abs(sum) < 128) {
+        if((i - 1) % (1 << 20) == 0 || abs(sum) < 128) {
             printf("%lu %d %lx\n", i * 64 + 63, sum, block);
         }
-
     }
 
+    
     printf("%d\n", sum);
+
+    free(aggregationBuffer);
+    free(headTableDivisor);
+    free(headTableFactor);
+    free(tailTable);
 
     return 0;
 }
