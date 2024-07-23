@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
 
@@ -99,12 +98,3 @@ uint8_t* primesU32() {
     free(flagsU16);
     return flagsU32;
 }
-
-// int main() {
-//     uint8_t* flags = primesU32();
-
-//     // bigPI(flags, UINT32_MAX) should be exactly 203280221
-//     printf("prime flags done with %lu primes\n", bigPI(flags, UINT32_MAX));
-
-//     return 0;
-// }
