@@ -63,8 +63,26 @@ uint8_t liouvilleLookup(uint64_t n) {
     }
 
     // TODO use primes table here too
-    // for(uint32_t div = 6; div <= (uint32_t)sqrt(n) + 1; div += 6) {
+    // for(uint32_t div = 5; div <= n / (div - 1) + 1; div++) {
+
+    //     if(headTableDivisor[div % HEAD_TABLE_SIZE] != 1) continue;
+
+    //     while(n % div == 0) {
+    //         factorCount ^= 1;
+    //         n /= div;
+    //     }
+
+    //     if(n < initial && n < TAIL_TABLE_SIZE * 64) {
+    //         return factorCount ^ (uint8_t)((tailTable[n / 64] >> (n % 64)) & 1);
+    //     }
+    // }
     for(uint32_t div = 6; div <= n / (div - 1) + 1; div += 6) {
+
+        // TODO don't use gotos
+        if(u32PrimeFlagTable[div - 1] == 0) {
+            goto nextTest;
+        }
+
         while(n % (div - 1) == 0) {
             factorCount ^= 1;
             n /= div - 1;
@@ -73,6 +91,10 @@ uint8_t liouvilleLookup(uint64_t n) {
         if(n < initial && n < TAIL_TABLE_SIZE * 64) {
             return factorCount ^ (uint8_t)((tailTable[n / 64] >> (n % 64)) & 1);
         }
+
+        nextTest:
+
+        if(u32PrimeFlagTable[div + 1] == 0) continue;
 
         while(n % (div + 1) == 0) {
             factorCount ^= 1;
