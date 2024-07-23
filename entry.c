@@ -52,8 +52,18 @@ uint8_t liouvilleLookup(uint64_t n) {
         return factorCount ^ (uint8_t)((tailTable[n / 64] >> (n % 64)) & 1);
     }
 
-    // TODO use primes table here
-    for(uint32_t div = 6; div <= (uint32_t)sqrt(n) + 1; div += 6) {
+    /* 
+        Checking for prime here lets it so the prgram doesn't have to trial division the 
+        rest intil sqrt n. The table now only works until 4 billion. so 
+    */
+    // TODO extend this table somehow
+    if(u32PrimeFlagTable[n] && n < UINT32_MAX) {
+        return factorCount ^ 1;
+    }
+
+    // TODO use primes table here too
+    // for(uint32_t div = 6; div <= (uint32_t)sqrt(n) + 1; div += 6) {
+    for(uint32_t div = 6; div <= n / (div - 1) + 1; div += 6) {
         while(n % (div - 1) == 0) {
             factorCount ^= 1;
             n /= div - 1;
@@ -73,12 +83,15 @@ uint8_t liouvilleLookup(uint64_t n) {
         }
 
     }
+
+
+
     // for(uint32_t div = 5; div <= n / div + 1; div++) {
     //     if(u32PrimeFlagTable[div] == 0) continue;
 
     //     while(n % div == 0) {
     //         factorCount ^= 1;
-    //         n /= div - 1;
+    //         n /= div;
     //     }
 
     //     if(n < initial && n < TAIL_TABLE_SIZE * 64) {
@@ -88,6 +101,7 @@ uint8_t liouvilleLookup(uint64_t n) {
     // }
  
     // case where the number is prime after the 2 and 3 test
+    // TODO pretty sure this is not needed now
     factorCount  ^= n > 2;
 
     return factorCount;
@@ -166,6 +180,7 @@ void fillBuffer(uint64_t* data, uint64_t startingBlock, uint32_t blockCount, uin
 int main() {
     printf("program started. current time: %jd\n", (intmax_t)time(NULL));
     
+    // TODO idea: generalized 6k+-1 but with 8! instead of 3!
     headTableDivisor = malloc(HEAD_TABLE_SIZE * sizeof(uint16_t));
     headTableFactor = malloc(HEAD_TABLE_SIZE * sizeof(uint8_t));
     
