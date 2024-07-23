@@ -4,6 +4,8 @@
 
 #include <pthread.h>
 
+#include <math.h>
+
 // ! do not edit or you might break something
 #define TABLE_FACTORIAL_BASE 8
 #define HEAD_TABLE_SIZE 40320
@@ -51,7 +53,7 @@ uint8_t liouvilleLookup(uint64_t n) {
     }
 
     // TODO use primes table here
-    for(uint32_t div = 6; div <= n / div + 1; div += 6) {
+    for(uint32_t div = 6; div <= (uint32_t)sqrt(n) + 1; div += 6) {
         while(n % (div - 1) == 0) {
             factorCount ^= 1;
             n /= div - 1;
@@ -71,6 +73,19 @@ uint8_t liouvilleLookup(uint64_t n) {
         }
 
     }
+    // for(uint32_t div = 5; div <= n / div + 1; div++) {
+    //     if(u32PrimeFlagTable[div] == 0) continue;
+
+    //     while(n % div == 0) {
+    //         factorCount ^= 1;
+    //         n /= div - 1;
+    //     }
+
+    //     if(n < initial && n < TAIL_TABLE_SIZE * 64) {
+    //         return factorCount ^ (uint8_t)((tailTable[n / 64] >> (n % 64)) & 1);
+    //     }
+
+    // }
  
     // case where the number is prime after the 2 and 3 test
     factorCount  ^= n > 2;
@@ -207,6 +222,7 @@ int main() {
             printf("%lu %ld %lx\n", i * 64 + 63, sum, block);
         }
     }
+    printf("%ld\n", sum);
 
     free(aggregationBuffer);
     free(headTableDivisor);
