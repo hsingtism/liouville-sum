@@ -6,9 +6,10 @@
 
 #include <math.h>
 
-// ! do not edit or you might break something
-#define TABLE_FACTORIAL_BASE 8
-#define HEAD_TABLE_SIZE 40320
+// https://oeis.org/A002110
+#define HEAD_TABLE_SIZE 30030
+uint16_t gcdU16(uint16_t a, uint16_t b);
+uint8_t liouville_full(uint64_t n);
 
 #define TAIL_TABLE_SIZE (uint64_t)1000000000
 #define TAIL_TABLE_FIRST_ENTRY 0xa835be21f89e39ac // see tailTableForstEntry.c
@@ -144,7 +145,6 @@ void* threadRoutine(void* arguments) {
 
 // blockSize must be a multiple of CPU_COUNT
 void fillBuffer(uint64_t* data, uint64_t startingBlock, uint32_t blockCount, uint8_t spawnThreads) {
-
     if(spawnThreads) {
         pthread_t threads[CPU_COUNT];
         struct ThreadData threadData[CPU_COUNT];
@@ -183,25 +183,10 @@ int main() {
     // TODO idea: generalized 6k+-1 but with 8! instead of 3!
     headTableDivisor = malloc(HEAD_TABLE_SIZE * sizeof(uint16_t));
     headTableFactor = malloc(HEAD_TABLE_SIZE * sizeof(uint8_t));
-    
-    headTableDivisor[0] = HEAD_TABLE_SIZE;
-    headTableFactor[0] = 1; // liouville_full(HEAD_TABLE_SIZE) is 1
 
-    for(uint16_t i = 1; i < HEAD_TABLE_SIZE; i++) {
-        uint16_t workingI = i;
-        
-        uint16_t divisor = 1;
-        uint8_t factors = 0;
-
-        for(uint8_t d = 2; d < TABLE_FACTORIAL_BASE; d++) {
-            if(d == 4 || d == 6) continue; // primes only
-            if(workingI % d) continue;
-            divisor *= d;
-            factors ^= 1;
-        }
-
-        headTableFactor[i] = factors;
-        headTableDivisor[i] = divisor;
+    for(uint16_t i = 0; i < HEAD_TABLE_SIZE; i++) {
+        headTableDivisor[i] = gcdU16(HEAD_TABLE_SIZE, i);
+        headTableFactor[i] = liouville_full(headTableDivisor[i]);
     }
     printf("tail table done. current time: %jd\n", (intmax_t)time(NULL));
 
