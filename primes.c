@@ -44,7 +44,7 @@ struct ThreadData {
     uint16_t threadIdent;
 };
 
-void* threadRoutine(void* arguments) {
+void* primeThreadRoutine(void* arguments) {
     struct ThreadData args = *(struct ThreadData*) arguments;
 
     // not perfect parallelism because smaller threadIdent will have way more tasks
@@ -69,7 +69,7 @@ void u32SieveHelped(uint8_t* table, uint8_t* primesFlag) {
         threadData[i].table = table;
         threadData[i].primesFlag = primesFlag;
         threadData[i].threadIdent = i;
-        pthread_create(&threads[i], NULL, threadRoutine, &threadData[i]);
+        pthread_create(&threads[i], NULL, primeThreadRoutine, &threadData[i]);
     }
 
     for(uint16_t i = 0; i < PRIME_TABLE_THREAD_COUNT; i++) {
@@ -100,11 +100,11 @@ uint8_t* primesU32() {
     return flagsU32;
 }
 
-int main() {
-    uint8_t* flags = primesU32();
+// int main() {
+//     uint8_t* flags = primesU32();
 
-    // bigPI(flags, UINT32_MAX) should be exactly 203280221
-    printf("prime flags done with %lu primes\n", bigPI(flags, UINT32_MAX));
+//     // bigPI(flags, UINT32_MAX) should be exactly 203280221
+//     printf("prime flags done with %lu primes\n", bigPI(flags, UINT32_MAX));
 
-    return 0;
-}
+//     return 0;
+// }

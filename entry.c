@@ -8,7 +8,6 @@
 #define TABLE_FACTORIAL_BASE 8
 #define HEAD_TABLE_SIZE 40320
 
-// purely arbitrary
 #define TAIL_TABLE_SIZE (uint64_t)1000000000
 #define TAIL_TABLE_FIRST_ENTRY 0xa835be21f89e39ac // see tailTableForstEntry.c
 
@@ -17,6 +16,10 @@
 uint16_t* headTableDivisor;
 uint8_t* headTableFactor;
 uint64_t* tailTable;
+
+uint8_t* u32PrimeFlagTable;
+uint8_t* primesU32();
+int64_t bigPI(uint8_t* table, uint64_t length);
 
 uint8_t liouvilleLookup(uint64_t n) {
     
@@ -47,6 +50,7 @@ uint8_t liouvilleLookup(uint64_t n) {
         return factorCount ^ (uint8_t)((tailTable[n / 64] >> (n % 64)) & 1);
     }
 
+    // TODO use primes table here
     for(uint32_t div = 6; div <= n / div + 1; div += 6) {
         while(n % (div - 1) == 0) {
             factorCount ^= 1;
@@ -145,7 +149,7 @@ void fillBuffer(uint64_t* data, uint64_t startingBlock, uint32_t blockCount, uin
 }
 
 int main() {
-    tailTable = malloc(TAIL_TABLE_SIZE * sizeof(uint64_t));
+    printf("program started. current time: %jd\n", (intmax_t)time(NULL));
     
     headTableDivisor = malloc(HEAD_TABLE_SIZE * sizeof(uint16_t));
     headTableFactor = malloc(HEAD_TABLE_SIZE * sizeof(uint8_t));
@@ -169,13 +173,21 @@ int main() {
         headTableFactor[i] = factors;
         headTableDivisor[i] = divisor;
     }
+    printf("tail table done. current time: %jd\n", (intmax_t)time(NULL));
 
+    u32PrimeFlagTable = primesU32();
+    printf("prime flags done with %lu primes. current time: %jd\n", bigPI(u32PrimeFlagTable, UINT32_MAX), (intmax_t)time(NULL));
+    printf("the table must contain exactly 203280221 primes\n");
+
+    tailTable = malloc(TAIL_TABLE_SIZE * sizeof(uint64_t));
 
     int64_t sum = -1; // start at -1 to account for liouville_full(0)
     uint64_t blockCount = 0;
 
     const uint32_t bufferChunkSize = CPU_COUNT * 16384;
     uint64_t* aggregationBuffer = malloc(bufferChunkSize * sizeof(uint64_t)); 
+
+    printf("all memory allocated. current time: %jd\n", (intmax_t)time(NULL));
 
     // for(uint64_t i = 0; ; i++) {  
     for(uint64_t i = 0; i < 15625000; i++) {  
@@ -200,6 +212,7 @@ int main() {
     free(headTableDivisor);
     free(headTableFactor);
     free(tailTable);
+    free(u32PrimeFlagTable);
 
     return 0;
 }
