@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
-#include <math.h>
 
 #include <pthread.h>
 
@@ -48,7 +47,7 @@ uint8_t liouvilleLookup(uint64_t n) {
         return factorCount ^ (uint8_t)((tailTable[n / 64] >> (n % 64)) & 1);
     }
 
-    for(uint32_t div = 6; div <= (uint32_t)sqrt(n) + 1; div += 6) {
+    for(uint32_t div = 6; div <= n / div + 1; div += 6) {
         while(n % (div - 1) == 0) {
             factorCount ^= 1;
             n /= div - 1;
@@ -178,8 +177,8 @@ int main() {
     const uint32_t bufferChunkSize = CPU_COUNT * 16384;
     uint64_t* aggregationBuffer = malloc(bufferChunkSize * sizeof(uint64_t)); 
 
-    for(uint64_t i = 0; ; i++) {  
-    // for(uint64_t i = 0; i < 15625000; i++) {  
+    // for(uint64_t i = 0; ; i++) {  
+    for(uint64_t i = 0; i < 15625000; i++) {  
         if(i % bufferChunkSize == 0) {
             // cannot multithread on first round because table isn't built
             fillBuffer(aggregationBuffer, i, bufferChunkSize, i != 0);
