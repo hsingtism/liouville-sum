@@ -10,10 +10,10 @@
 #define HEAD_TABLE_SIZE 40320
 
 // purely arbitrary
-#define TAIL_TABLE_SIZE 10000000
+#define TAIL_TABLE_SIZE (uint64_t)1000000000
 #define TAIL_TABLE_FIRST_ENTRY 0xa835be21f89e39ac // see tailTableForstEntry.c
 
-#define CPU_COUNT 16
+#define CPU_COUNT 32
 
 uint16_t* headTableDivisor;
 uint8_t* headTableFactor;
@@ -111,7 +111,6 @@ void* threadRoutine(void* arguments) {
 
 
 // blockSize must be a multiple of CPU_COUNT
-// TODO multithread here
 void fillBuffer(uint64_t* data, uint64_t startingBlock, uint32_t blockCount, uint8_t spawnThreads) {
 
     if(spawnThreads) {
@@ -173,13 +172,14 @@ int main() {
     }
 
 
-    int32_t sum = -1; // start at -1 to account for liouville_full(0)
+    int64_t sum = -1; // start at -1 to account for liouville_full(0)
     uint64_t blockCount = 0;
 
     const uint32_t bufferChunkSize = CPU_COUNT * 16384;
     uint64_t* aggregationBuffer = malloc(bufferChunkSize * sizeof(uint64_t)); 
 
-    for(uint64_t i = 0; ; i++) {        
+    for(uint64_t i = 0; ; i++) {  
+    // for(uint64_t i = 0; i < 15625000; i++) {  
         if(i % bufferChunkSize == 0) {
             // cannot multithread on first round because table isn't built
             fillBuffer(aggregationBuffer, i, bufferChunkSize, i != 0);
@@ -193,7 +193,7 @@ int main() {
         sum += __builtin_popcountll(block) * -2 + 64;
 
         if((i - 1) % (1 << 20) == 0 || abs(sum) < 128) {
-            printf("%lu %d %lx\n", i * 64 + 63, sum, block);
+            printf("%lu %ld %lx\n", i * 64 + 63, sum, block);
         }
     }
 
