@@ -1,2 +1,2 @@
 #!/bin/bash
-gcc entry.c -O3 -o test
+gcc -O3 -o test entry.c primes.c
