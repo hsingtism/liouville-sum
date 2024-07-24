@@ -16,12 +16,6 @@ void sieve(uint8_t* table, uint64_t length) {
     }
 }
 
-void zero(uint8_t* table, uint64_t length) {
-    for(uint64_t i = 0; i < length; i++) {
-        table[i] = 0;
-    }
-}
-
 void invert(uint8_t* table, uint64_t length) {
     for(uint64_t i = 0; i < length; i++) {
         table[i] = table[i] == 0;
@@ -85,13 +79,11 @@ void u32SieveHelped(uint8_t* table, uint8_t* primesFlag) {
 }
 
 uint8_t* primesU32() {
-    uint8_t* flagsU16 = malloc(UINT16_MAX);
-    zero(flagsU16, UINT16_MAX);
+    uint8_t* flagsU16 = calloc(UINT16_MAX, sizeof(uint8_t));
     sieve(flagsU16, UINT16_MAX);
     invert(flagsU16, UINT16_MAX);
 
-    uint8_t* flagsU32 = malloc(UINT32_MAX);
-    zero(flagsU32, UINT32_MAX);
+    uint8_t* flagsU32 = calloc(UINT32_MAX, sizeof(uint8_t));
     u32SieveHelped(flagsU32, flagsU16);
     invert(flagsU32, UINT32_MAX);
 
