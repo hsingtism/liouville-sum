@@ -4,7 +4,7 @@ This project was one of my first programming projects. After two years, I am rew
 
 # Multithreaded Evaluator of the Summatory Liouville Function
 
-This program evalulates the summatory liouville function in blocks of 64 values with two lookup tables. It supports multithreading. Without any tuning, it can sum to 1 billion (where it disproved the [Polya conjecture](https://en.wikipedia.org/wiki/P%C3%B3lya_conjecture)) in about ~~135~~ ~~44~~ 32 seconds on my laptop with an Intel Core Ultra 7 155H under Windows 11 WSL. 
+This program evalulates the summatory liouville function in blocks of 64 values with two lookup tables. It supports multithreading. Without any tuning, it can sum to 1 billion (where it disproved the [Polya conjecture](https://en.wikipedia.org/wiki/P%C3%B3lya_conjecture)) in about ~~135~~ ~~44~~ 32 seconds on my laptop with an Intel Core Ultra 7 155H under Windows 11 WSL. (Note that the 32 second time is not optimized for the 1 billion run because it allocates a 64 billion value lookup table and a 2^32 long primes table.) It also sums to 2^32 in 172 seconds. I'm still working on optimizations after the primes table. 
 
 See [A002819](https://oeis.org/A002819) on the OEIS. I am not familiar enough with the concept to explain the mathmatical part of it.
 

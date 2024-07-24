@@ -109,10 +109,25 @@ uint8_t millerRabinU64(uint64_t n) {
     uint64_t d = n - 1;
     uint8_t s = __builtin_ctzll(d);
 
-    uint8_t bases[] = {2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37};
+    uint8_t baseCount;
+    uint64_t bases[16];
+    // https://miller-rabin.appspot.com/
+    if(n < 350269456337ULL) {
+        bases[0] = 4230279247111683200ULL;
+        bases[1] = 14694767155120705706ULL;
+        bases[2] = 16641139526367750375ULL;
+        baseCount = 3;
+    } else {
+        // ! not ready
+        int a = *(int*)NULL;
+        // bases[0] = 2ULL;
+        // bases = {2ULL, 325ULL, 9375ULL, 28178ULL, 450775ULL, 9780504ULL, 1795265022ULL};
+        baseCount = 7;
+    }
 
-    for(uint8_t tn = 0; tn < 12; tn++) {
-        uint8_t a = bases[tn];
+
+    for(uint8_t tn = 0; tn < baseCount; tn++) {
+        uint64_t a = bases[tn];
         uint64_t y;
 
         uint64_t x = modularExponentiation(a, d, n);

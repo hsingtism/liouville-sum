@@ -40,6 +40,7 @@ struct ThreadData {
 void* primeThreadRoutine(void* arguments) {
     struct ThreadData args = *(struct ThreadData*) arguments;
 
+    // these increment then skip is extremely fast so no need to further optimize
     // not perfect parallelism because smaller threadIdent will have way more tasks
     for(uint64_t i = args.threadIdent; i < UINT16_MAX; i += PRIME_TABLE_THREAD_COUNT) {
         if(args.primesFlag[i] == 0) continue;

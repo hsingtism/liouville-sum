@@ -55,13 +55,15 @@ uint8_t liouvilleLookup(uint64_t n) {
         return factorCount ^ (uint8_t)((tailTable[n / 64] >> (n % 64)) & 1);
     }
 
+    if(n < UINT32_MAX && u32PrimeFlagTable[n]) {
+        return factorCount ^ 1;
+    } 
+    // else if(headTableDivisor[n % HEAD_TABLE_SIZE] != 1 && millerRabinU64(n)) {
+    //     return factorCount ^ 1;
+    // }
+    
     for(uint32_t div = 6; div <= n / (div - 1) + 1; div += 6) {
 
-        if(n < UINT32_MAX && u32PrimeFlagTable[n]) {
-            return factorCount ^ 1;
-        } else if(headTableDivisor[n % HEAD_TABLE_SIZE] != 1 && millerRabinU64(n)) {
-            return factorCount ^ 1;
-        }
 
         // TODO don't use gotos
         if(u32PrimeFlagTable[div - 1] == 0) {
@@ -192,7 +194,8 @@ int main() {
     printf("all memory allocated. current time: %jd\n", (intmax_t)time(NULL));
 
     // for(uint64_t i = 0; ; i++) {  
-    for(uint64_t i = 0; i < 15625000; i++) {  
+    // for(uint64_t i = 0; i < 15625000; i++) {  
+    for(uint64_t i = 0; i < 156250000; i++) {  
         if(i % bufferChunkSize == 0) {
             // cannot multithread on first round because table isn't built
             fillBuffer(aggregationBuffer, i, bufferChunkSize, i != 0);
