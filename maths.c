@@ -129,17 +129,3 @@ uint8_t millerRabinU64(uint64_t n) {
 
     return 1;
 }
-
-// #include <stdio.h>
-
-// int main() {
-//     for(uint32_t i = 0; i < 10000; i++) {
-//         millerRabinU64(4294967291ULL);
-//         millerRabinU64(999999999989ULL);
-//     }
-//     printf("%u\n",  millerRabinU64(4294967291ULL)); // prime
-//     printf("%u\n",  millerRabinU64(999999999989ULL)); // prime
-//     // printf("%u\n",  millerRabinU64(18446744073709551557ULL)); // prime
-//     // printf("%u\n",  millerRabinU64(9223372021822390277ULL)); // not prime
-//     return 0;
-// }

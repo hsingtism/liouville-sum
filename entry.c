@@ -55,31 +55,19 @@ uint8_t liouvilleLookup(uint64_t n) {
         return factorCount ^ (uint8_t)((tailTable[n / 64] >> (n % 64)) & 1);
     }
 
-    /* 
-        Checking for prime here lets it so the prgram doesn't have to trial division the 
-        rest intil sqrt n. The table now only works until 4 billion. so 
-    */
-    // TODO extend this table somehow
-    if(n < UINT32_MAX && u32PrimeFlagTable[n]) {
-        return factorCount ^ 1;
-    } else if(headTableDivisor[n % HEAD_TABLE_SIZE] != 1 && millerRabinU64(n)) {
-        return factorCount ^ 1;
-    }
-
-    // for(uint32_t div = 5; div <= n / (div - 1) + 1; div++) {
-
-    //     if(headTableDivisor[div % HEAD_TABLE_SIZE] != 1) continue;
-
-    //     while(n % div == 0) {
-    //         factorCount ^= 1;
-    //         n /= div;
-    //     }
-
-    //     if(n < initial && n < TAIL_TABLE_SIZE * 64) {
-    //         return factorCount ^ (uint8_t)((tailTable[n / 64] >> (n % 64)) & 1);
-    //     }
+    // if(n < UINT32_MAX && u32PrimeFlagTable[n]) {
+    //     return factorCount ^ 1;
+    // } else if(headTableDivisor[n % HEAD_TABLE_SIZE] != 1 && millerRabinU64(n)) {
+    //     return factorCount ^ 1;
     // }
+
     for(uint32_t div = 6; div <= n / (div - 1) + 1; div += 6) {
+
+        if(n < UINT32_MAX && u32PrimeFlagTable[n]) {
+            return factorCount ^ 1;
+        } else if(headTableDivisor[n % HEAD_TABLE_SIZE] != 1 && millerRabinU64(n)) {
+            return factorCount ^ 1;
+        }
 
         // TODO don't use gotos
         if(u32PrimeFlagTable[div - 1] == 0) {
@@ -186,7 +174,6 @@ void fillBuffer(uint64_t* data, uint64_t startingBlock, uint32_t blockCount, uin
 int main() {
     printf("program started. current time: %jd\n", (intmax_t)time(NULL));
     
-    // TODO idea: generalized 6k+-1 but with 8! instead of 3!
     headTableDivisor = malloc(HEAD_TABLE_SIZE * sizeof(uint16_t));
     headTableFactor = malloc(HEAD_TABLE_SIZE * sizeof(uint8_t));
 
