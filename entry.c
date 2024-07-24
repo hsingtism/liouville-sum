@@ -24,6 +24,8 @@ uint8_t* u32PrimeFlagTable;
 uint8_t* primesU32();
 int64_t bigPI(uint8_t* table, uint64_t length);
 
+uint8_t millerRabinU64(uint64_t n);
+
 uint8_t liouvilleLookup(uint64_t n) {
     
     const uint64_t initial = n;
@@ -58,11 +60,12 @@ uint8_t liouvilleLookup(uint64_t n) {
         rest intil sqrt n. The table now only works until 4 billion. so 
     */
     // TODO extend this table somehow
-    if(u32PrimeFlagTable[n] && n < UINT32_MAX) {
+    if(n < UINT32_MAX && u32PrimeFlagTable[n]) {
+        return factorCount ^ 1;
+    } else if(headTableDivisor[n % HEAD_TABLE_SIZE] != 1 && millerRabinU64(n)) {
         return factorCount ^ 1;
     }
 
-    // TODO use primes table here too
     // for(uint32_t div = 5; div <= n / (div - 1) + 1; div++) {
 
     //     if(headTableDivisor[div % HEAD_TABLE_SIZE] != 1) continue;
@@ -106,27 +109,8 @@ uint8_t liouvilleLookup(uint64_t n) {
         }
 
     }
-
-
-
-    // for(uint32_t div = 5; div <= n / div + 1; div++) {
-    //     if(u32PrimeFlagTable[div] == 0) continue;
-
-    //     while(n % div == 0) {
-    //         factorCount ^= 1;
-    //         n /= div;
-    //     }
-
-    //     if(n < initial && n < TAIL_TABLE_SIZE * 64) {
-    //         return factorCount ^ (uint8_t)((tailTable[n / 64] >> (n % 64)) & 1);
-    //     }
-
-    // }
  
-    // case where the number is prime after the 2 and 3 test
-    // TODO pretty sure this is not needed now
     factorCount  ^= n > 2;
-
     return factorCount;
 }
 

@@ -58,3 +58,88 @@ uint8_t liouville_full(uint64_t n) {
 
     return factorCount;
 }
+
+
+// lots of help from https://github.com/going-digital/Prime64/blob/master/Prime64.cpp
+uint64_t modularMultiplication(uint64_t a, uint64_t b, uint64_t mod) {
+    uint64_t t = 0;
+
+    while(b) {
+        if(b & 1) {
+            uint64_t t2 = t + a;
+            if(t2 < t) t2 -= mod;
+            t = t2 % mod; 
+        }
+
+        b >>= 1;
+
+        if(b) {
+            uint64_t a2 = a << 1;
+            if(a2 < a) a2 -= mod;
+            a = a2 % mod;
+        }
+    }
+
+    return t;
+}
+
+uint64_t modularExponentiation(uint64_t base, uint64_t exp, uint64_t mod) {
+    uint64_t t = 1;
+
+    while(exp) {
+        if(exp & 1) {
+            t = modularMultiplication(t, base, mod);
+        }
+
+        exp >>= 1;
+
+        if(exp) {
+            base = modularMultiplication(base, base, mod);
+        }
+    }
+
+    return t;
+}
+
+// deterministic for all u64
+// this is relatively slow, use as a last resort when all wheel methods are unavilable
+uint8_t millerRabinU64(uint64_t n) {
+    if(n & 1 == 0) return 0;
+
+    uint64_t d = n - 1;
+    uint8_t s = __builtin_ctzll(d);
+
+    uint8_t bases[] = {2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37};
+
+    for(uint8_t tn = 0; tn < 12; tn++) {
+        uint8_t a = bases[tn];
+        uint64_t y;
+
+        uint64_t x = modularExponentiation(a, d, n);
+        for(uint8_t i = 0; i < s; i++) {
+            y = modularMultiplication(x, x, n);
+            if(y == 1 && x != 1 && x != n - 1) {
+                return 0;
+            }
+        }
+        if(y != 1) {
+            return 0;
+        }
+    }
+
+    return 1;
+}
+
+// #include <stdio.h>
+
+// int main() {
+//     for(uint32_t i = 0; i < 10000; i++) {
+//         millerRabinU64(4294967291ULL);
+//         millerRabinU64(999999999989ULL);
+//     }
+//     printf("%u\n",  millerRabinU64(4294967291ULL)); // prime
+//     printf("%u\n",  millerRabinU64(999999999989ULL)); // prime
+//     // printf("%u\n",  millerRabinU64(18446744073709551557ULL)); // prime
+//     // printf("%u\n",  millerRabinU64(9223372021822390277ULL)); // not prime
+//     return 0;
+// }
