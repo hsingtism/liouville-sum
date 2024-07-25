@@ -6,6 +6,8 @@
 
 #include <math.h>
 
+#include "bitfieldHelp.h"
+
 // https://oeis.org/A002110
 #define HEAD_TABLE_SIZE 30030
 uint16_t gcdU16(uint16_t a, uint16_t b);
@@ -36,14 +38,14 @@ uint8_t liouvilleLookup(uint64_t n) {
     n = n >> trailingZeroCount;
 
     if(n < initial && n < TAIL_TABLE_SIZE * 64) {
-        return factorCount ^ (uint8_t)(tailTable[n / 64] >> (n % 64)) & 1;
+        return factorCount ^ getBit(tailTable, n);
     }
 
     factorCount ^= headTableFactor[n % HEAD_TABLE_SIZE];
     n /= headTableDivisor[n % HEAD_TABLE_SIZE];
 
     if(n < initial && n < TAIL_TABLE_SIZE * 64) {
-        return factorCount ^ (uint8_t)(tailTable[n / 64] >> (n % 64)) & 1;
+        return factorCount ^ getBit(tailTable, n);
     }
 
     while(n % 3 == 0) {
@@ -52,7 +54,7 @@ uint8_t liouvilleLookup(uint64_t n) {
     }
     
     if(n < initial && n < TAIL_TABLE_SIZE * 64) {
-        return factorCount ^ (uint8_t)((tailTable[n / 64] >> (n % 64)) & 1);
+        return factorCount ^ getBit(tailTable, n);
     }
 
     if(n < UINT32_MAX && u32PrimeFlagTable[n]) {
@@ -76,7 +78,7 @@ uint8_t liouvilleLookup(uint64_t n) {
         }
 
         if(n < initial && n < TAIL_TABLE_SIZE * 64) {
-            return factorCount ^ (uint8_t)((tailTable[n / 64] >> (n % 64)) & 1);
+            return factorCount ^ getBit(tailTable, n);
         }
 
         nextTest:
@@ -89,7 +91,7 @@ uint8_t liouvilleLookup(uint64_t n) {
         }
 
         if(n < initial && n < TAIL_TABLE_SIZE * 64) {
-            return factorCount ^ (uint8_t)((tailTable[n / 64] >> (n % 64)) & 1);
+            return factorCount ^ getBit(tailTable, n);
         }
 
     }
@@ -194,8 +196,8 @@ int main() {
     printf("all memory allocated. current time: %jd\n", (intmax_t)time(NULL));
 
     // for(uint64_t i = 0; ; i++) {  
-    // for(uint64_t i = 0; i < 15625000; i++) {  
-    for(uint64_t i = 0; i < 156250000; i++) {  
+    for(uint64_t i = 0; i < 15625000; i++) {  
+    // for(uint64_t i = 0; i < 156250000; i++) {  
         if(i % bufferChunkSize == 0) {
             // cannot multithread on first round because table isn't built
             fillBuffer(aggregationBuffer, i, bufferChunkSize, i != 0);
