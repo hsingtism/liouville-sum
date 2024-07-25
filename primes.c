@@ -1,7 +1,5 @@
-#include <stdlib.h>
-#include <stdint.h>
-
-#include <pthread.h>
+#include "primes.h"
+#include "bitfieldHelp.h"
 
 #define PRIME_TABLE_THREAD_COUNT 32
 
@@ -91,3 +89,40 @@ uint8_t* primesU32() {
     free(flagsU16);
     return flagsU32;
 }
+
+
+// ! DO NOT USE UINT_32_MAX / 64
+// using the type_MAX constant misses one value, but that value is always
+// composite. using it in the bit table misses 2 primes.
+
+// this is done singlethreaded else it might lead to a race condition
+uint64_t* primesU32cprs() {
+    uint8_t* flagsU32 = primesU32();
+    uint64_t* flagsU32cprs = calloc(PRIME_BIT_TABLE_LENGTH, sizeof(uint64_t));
+
+    for(uint64_t i = 0; i < UINT32_MAX; i++) {
+        setBitFromZero(flagsU32cprs, i, flagsU32[i]);
+    }
+    
+    free(flagsU32);
+    return flagsU32cprs;
+}
+
+int64_t bigPIcprs(uint64_t* table, uint64_t blockLength) {
+    uint64_t sum = 0;
+    for(uint64_t i = 0; i < blockLength; i++) {
+        sum += __builtin_popcountll(table[i]);
+    }
+
+    return sum;
+}
+
+// #include <stdio.h>
+// int main() {
+//     uint64_t* table = primesU32cprs();
+//     uint32_t sum = 0;
+    
+//     printf("%lu\n", bigPIcprs(table, PRIME_BIT_TABLE_LENGTH));
+
+//     return 0;
+// }

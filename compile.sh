@@ -1,2 +1,2 @@
 #!/bin/bash
-gcc -O3 -o test entry.c primes.c maths.c -lm
+gcc -O3 bitfieldHelp.c bitfieldHelp.h entry.c maths.c primes.c primes.h -o test -lm

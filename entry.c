@@ -181,6 +181,7 @@ int main() {
     }
     printf("tail table done. current time: %jd\n", (intmax_t)time(NULL));
 
+    // todo use the compressed prime table
     u32PrimeFlagTable = primesU32();
     printf("prime flags done with %lu primes. current time: %jd\n", bigPI(u32PrimeFlagTable, UINT32_MAX), (intmax_t)time(NULL));
     printf("the table must contain exactly 203280221 primes\n");
