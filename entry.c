@@ -7,6 +7,10 @@
 #include <math.h>
 
 #include "bitfieldHelp.h"
+#include "primes.h"
+
+uint64_t* primeBitsU32;
+uint8_t millerRabinU64(uint64_t n);
 
 // https://oeis.org/A002110
 #define HEAD_TABLE_SIZE 30030
@@ -21,12 +25,6 @@ uint8_t liouville_full(uint64_t n);
 uint16_t* headTableDivisor;
 uint8_t* headTableFactor;
 uint64_t* tailTable;
-
-uint8_t* u32PrimeFlagTable;
-uint8_t* primesU32();
-int64_t bigPI(uint8_t* table, uint64_t length);
-
-uint8_t millerRabinU64(uint64_t n);
 
 uint8_t liouvilleLookup(uint64_t n) {
     
@@ -57,7 +55,7 @@ uint8_t liouvilleLookup(uint64_t n) {
         return factorCount ^ getBit(tailTable, n);
     }
 
-    if(n < UINT32_MAX && u32PrimeFlagTable[n]) {
+    if(n < UINT32_MAX && getBit(primeBitsU32, n)) {
         return factorCount ^ 1;
     } 
     // else if(headTableDivisor[n % HEAD_TABLE_SIZE] != 1 && millerRabinU64(n)) {
@@ -68,7 +66,7 @@ uint8_t liouvilleLookup(uint64_t n) {
 
 
         // TODO don't use gotos
-        if(u32PrimeFlagTable[div - 1] == 0) {
+        if(getBit(primeBitsU32, div - 1) == 0) {
             goto nextTest;
         }
 
@@ -83,7 +81,7 @@ uint8_t liouvilleLookup(uint64_t n) {
 
         nextTest:
 
-        if(u32PrimeFlagTable[div + 1] == 0) continue;
+        if(getBit(primeBitsU32, div + 1) == 0) continue;
 
         while(n % (div + 1) == 0) {
             factorCount ^= 1;
@@ -181,9 +179,9 @@ int main() {
     }
     printf("tail table done. current time: %jd\n", (intmax_t)time(NULL));
 
-    // todo use the compressed prime table
-    u32PrimeFlagTable = primesU32();
-    printf("prime flags done with %lu primes. current time: %jd\n", bigPI(u32PrimeFlagTable, UINT32_MAX), (intmax_t)time(NULL));
+
+    primeBitsU32 = primesU32cprs();
+    printf("prime flags done with %lu primes. current time: %jd\n", bigPIcprs(primeBitsU32, PRIME_BIT_TABLE_LENGTH), (intmax_t)time(NULL));
     printf("the table must contain exactly 203280221 primes\n");
 
     tailTable = malloc(TAIL_TABLE_SIZE * sizeof(uint64_t));
@@ -221,7 +219,7 @@ int main() {
     free(headTableDivisor);
     free(headTableFactor);
     free(tailTable);
-    free(u32PrimeFlagTable);
+    free(primeBitsU32);
 
     return 0;
 }

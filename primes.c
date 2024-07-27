@@ -20,14 +20,14 @@ void invert(uint8_t* table, uint64_t length) {
     }
 }
 
-int64_t bigPI(uint8_t* table, uint64_t length) {
-    uint64_t sum = 0;
-    for(uint64_t i = 0; i < length; i++) {
-        sum += table[i];
-    }
+// int64_t bigPI(uint8_t* table, uint64_t length) {
+//     uint64_t sum = 0;
+//     for(uint64_t i = 0; i < length; i++) {
+//         sum += table[i];
+//     }
 
-    return sum;
-}
+//     return sum;
+// }
 
 struct ThreadData {
     uint8_t* table;
@@ -90,12 +90,21 @@ uint8_t* primesU32() {
     return flagsU32;
 }
 
-
-// ! DO NOT USE UINT_32_MAX / 64
+// ! DO NOT USE "UINT_32_MAX / 64"
 // using the type_MAX constant misses one value, but that value is always
 // composite. using it in the bit table misses 2 primes.
 
+// converting from the byte flag to the bit flag takes about 5-10 seconds
+// but it saves 7/8 memory. Accessing does not add a lot of overhead.
+// TODO maybe find a fast way to do a factor wheel check and map
+// TODO for higher values maybe have a list and do binary search
+// we do need a big initial prime table because a test takes a long time
+// and the nature of the program will benefir from any bigger table
+// as of now, `liouvilleLookup` is effectively doing trial division
+// which will get very slow as n increases. 
+
 // this is done singlethreaded else it might lead to a race condition
+
 uint64_t* primesU32cprs() {
     uint8_t* flagsU32 = primesU32();
     uint64_t* flagsU32cprs = calloc(PRIME_BIT_TABLE_LENGTH, sizeof(uint64_t));
@@ -116,13 +125,3 @@ int64_t bigPIcprs(uint64_t* table, uint64_t blockLength) {
 
     return sum;
 }
-
-// #include <stdio.h>
-// int main() {
-//     uint64_t* table = primesU32cprs();
-//     uint32_t sum = 0;
-    
-//     printf("%lu\n", bigPIcprs(table, PRIME_BIT_TABLE_LENGTH));
-
-//     return 0;
-// }
