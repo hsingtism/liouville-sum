@@ -46,6 +46,9 @@ uint8_t liouvilleLookup(uint64_t n) {
         return factorCount ^ getBit(tailTable, n);
     }
 
+    // this is still needed (maybe) in case one application of the
+    // head table still left factors. This only affects value after
+    // the tail table has ended (64,000,000,000)
     while(n % 3 == 0) { factorCount ^= 1; n /= 3; }
     while(n % 5 == 0) { factorCount ^= 1; n /= 5; }
     while(n % 7 == 0) { factorCount ^= 1; n /= 7; }
@@ -56,7 +59,7 @@ uint8_t liouvilleLookup(uint64_t n) {
         return factorCount ^ getBit(tailTable, n);
     }
 
-    if(n < UINT32_MAX && getBit(primeBitsU32, n)) {
+    if(n < PRIME_TABLE_MAX && getBit(primeBitsU32, n)) {
         return factorCount ^ 1;
     } 
     // else if(headTableDivisor[n % HEAD_TABLE_SIZE] != 1 && millerRabinU64(n)) {
@@ -168,7 +171,7 @@ void fillBuffer(uint64_t* data, uint64_t startingBlock, uint32_t blockCount, uin
 }
 
 int main() {
-    printf("program started. current time: %jd\n", (intmax_t)time(NULL));
+    printf("%jd: program started\n", (intmax_t)time(NULL));
     
     headTableDivisor = malloc(HEAD_TABLE_SIZE * sizeof(uint16_t));
     headTableFactor = malloc(HEAD_TABLE_SIZE * sizeof(uint8_t));
@@ -177,12 +180,12 @@ int main() {
         headTableDivisor[i] = gcdU16(HEAD_TABLE_SIZE, i);
         headTableFactor[i] = liouville_full(headTableDivisor[i]);
     }
-    printf("tail table done. current time: %jd\n", (intmax_t)time(NULL));
+    printf("%jd: tail table done\n", (intmax_t)time(NULL));
 
 
     primeBitsU32 = primesU32cprs();
-    printf("prime flags done with %lu primes. current time: %jd\n", bigPIcprs(primeBitsU32, PRIME_BIT_TABLE_LENGTH), (intmax_t)time(NULL));
-    printf("the table must contain exactly 203280221 primes\n");
+    printf("%jd: prime flags done - %lu primes \n", (intmax_t)time(NULL), bigPIcprs(primeBitsU32, PRIME_BIT_TABLE_LENGTH));
+    printf("the table must contain exactly %u primes\n", PRIME_TABLE_PRIME_COUNT);
 
     tailTable = malloc(TAIL_TABLE_SIZE * sizeof(uint64_t));
 
@@ -192,7 +195,7 @@ int main() {
     const uint32_t bufferChunkSize = CPU_COUNT * 16384;
     uint64_t* aggregationBuffer = malloc(bufferChunkSize * sizeof(uint64_t)); 
 
-    printf("all memory allocated. current time: %jd\n", (intmax_t)time(NULL));
+    printf("%jd: all memory allocated\n", (intmax_t)time(NULL));
 
     // for(uint64_t i = 0; ; i++) {  
     for(uint64_t i = 0; i < 15625000; i++) {  
@@ -202,8 +205,8 @@ int main() {
             fillBuffer(aggregationBuffer, i, bufferChunkSize, i != 0);
             blockCount++;
 
-            printf("block %lu with %u values fulfilled. multithreaded: %u. current time: %jd\n",
-                blockCount, bufferChunkSize * 64, i != 0, (intmax_t)time(NULL));
+            printf("%jd: block %lu with %u values fulfilled. multithreaded: %u\n",
+                (intmax_t)time(NULL), blockCount, bufferChunkSize * 64, i != 0);
         }
 
         uint64_t block = aggregationBuffer[i % bufferChunkSize];
