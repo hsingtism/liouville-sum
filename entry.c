@@ -46,11 +46,12 @@ uint8_t liouvilleLookup(uint64_t n) {
         return factorCount ^ getBit(tailTable, n);
     }
 
-    while(n % 3 == 0) {
-        factorCount ^= 1;
-        n /= 3;
-    }
-    
+    while(n % 3 == 0) { factorCount ^= 1; n /= 3; }
+    while(n % 5 == 0) { factorCount ^= 1; n /= 5; }
+    while(n % 7 == 0) { factorCount ^= 1; n /= 7; }
+    while(n % 11 == 0) { factorCount ^= 1; n /= 11; }
+    while(n % 13 == 0) { factorCount ^= 1; n /= 13; }
+
     if(n < initial && n < TAIL_TABLE_SIZE * 64) {
         return factorCount ^ getBit(tailTable, n);
     }
@@ -62,8 +63,7 @@ uint8_t liouvilleLookup(uint64_t n) {
     //     return factorCount ^ 1;
     // }
     
-    for(uint32_t div = 6; div <= n / (div - 1) + 1; div += 6) {
-
+    for(uint32_t div = 18; div <= n / (div - 1) + 1; div += 6) {
 
         // TODO don't use gotos
         if(getBit(primeBitsU32, div - 1) == 0) {
