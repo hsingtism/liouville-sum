@@ -170,6 +170,19 @@ void fillBuffer(uint64_t* data, uint64_t startingBlock, uint32_t blockCount, uin
     }
 }
 
+void printZeros(uint64_t block, int64_t sum, uint64_t offset) {
+    int64_t sumF = sum;
+    if(sumF == 0) {
+        printf("%lu %ld\n", offset, sumF);
+    }
+    for(uint64_t i = 0; i < 64; i++) {
+        sumF += getBit(&block, i) * -2 + 1;
+        if(sumF == 0) {
+            printf("%lu %ld\n", offset + i, sumF);
+        }
+    }
+}
+
 int main() {
     printf("%jd: program started\n", (intmax_t)time(NULL));
     
@@ -210,9 +223,14 @@ int main() {
         }
 
         uint64_t block = aggregationBuffer[i % bufferChunkSize];
+
+        if(abs(sum) < 64) {
+            printZeros(block, sum, i * 64);
+        }
+
         sum += __builtin_popcountll(block) * -2 + 64;
 
-        if((i - 1) % (1 << 20) == 0 || abs(sum) < 128) {
+        if((i - 1) % (1 << 20) == 0) {
             printf("%lu %ld %lx\n", i * 64 + 63, sum, block);
         }
     }
