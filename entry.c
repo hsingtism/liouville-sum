@@ -26,6 +26,8 @@ uint16_t* headTableDivisor;
 uint8_t* headTableFactor;
 uint64_t* tailTable;
 
+int is_prime_2_64(uint64_t a);
+
 uint8_t liouvilleLookup(uint64_t n) {
     
     const uint64_t initial = n;
@@ -61,7 +63,9 @@ uint8_t liouvilleLookup(uint64_t n) {
 
     if(n < PRIME_TABLE_MAX && getBit(primeBitsU32, n)) {
         return factorCount ^ 1;
-    } 
+    } else if (headTableDivisor[n % HEAD_TABLE_SIZE] == 1 && is_prime_2_64(n)) {
+        return factorCount ^ 1;
+    }
     // else if(headTableDivisor[n % HEAD_TABLE_SIZE] != 1 && millerRabinU64(n)) {
     //     return factorCount ^ 1;
     // }
@@ -211,8 +215,8 @@ int main() {
     printf("%jd: all memory allocated\n", (intmax_t)time(NULL));
 
     // for(uint64_t i = 0; ; i++) {  
-    for(uint64_t i = 0; i < 15625000; i++) {  
-    // for(uint64_t i = 0; i < 156250000; i++) {  
+    // for(uint64_t i = 0; i < 15625000; i++) {  
+    for(uint64_t i = 0; i < 156250000; i++) {  
         if(i % bufferChunkSize == 0) {
             // cannot multithread on first round because table isn't built
             fillBuffer(aggregationBuffer, i, bufferChunkSize, i != 0);
@@ -224,6 +228,7 @@ int main() {
 
         uint64_t block = aggregationBuffer[i % bufferChunkSize];
 
+        // TODO print minimums and maximums
         if(abs(sum) < 64) {
             printZeros(block, sum, i * 64);
         }
