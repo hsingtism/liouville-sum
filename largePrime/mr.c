@@ -16,16 +16,6 @@
 
 */
 
-// #include <cstdlib>
-// #include <stdio.h>
-// #include <vector>
-// #include <sys/time.h> 
-// #include <random>
-// using namespace std;
-
-// typedef unsigned long long uint64; 
-// typedef long long int64; 
- 
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -1431,7 +1421,7 @@ int hashh(uint64 x) {
     return x&262143;
 }
 
-// int is_prime_2_64(uint64 a) {
+// used externally
 int is_prime_2_64(uint64_t a) {
     if (a==2 || a==3 || a==5 || a==7) return true;
     if (a%2==0 || a%3==0 || a%5==0 || a%7==0) return false;

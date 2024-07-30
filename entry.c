@@ -1,21 +1,13 @@
 #include <stdio.h>
-#include <stdint.h>
-#include <stdlib.h>
-
-#include <pthread.h>
-
-#include <math.h>
 
 #include "bitfieldHelp.h"
 #include "primes.h"
+#include "maths.h"
 
 uint64_t* primeBitsU32;
-uint8_t millerRabinU64(uint64_t n);
 
 // https://oeis.org/A002110
 #define HEAD_TABLE_SIZE 30030
-uint16_t gcdU16(uint16_t a, uint16_t b);
-uint8_t liouville_full(uint64_t n);
 
 #define TAIL_TABLE_SIZE (uint64_t)1000000000
 #define TAIL_TABLE_FIRST_ENTRY 0xa835be21f89e39ac // see tailTableForstEntry.c
@@ -66,9 +58,6 @@ uint8_t liouvilleLookup(uint64_t n) {
     } else if (headTableDivisor[n % HEAD_TABLE_SIZE] == 1 && is_prime_2_64(n)) {
         return factorCount ^ 1;
     }
-    // else if(headTableDivisor[n % HEAD_TABLE_SIZE] != 1 && millerRabinU64(n)) {
-    //     return factorCount ^ 1;
-    // }
     
     for(uint32_t div = 18; div <= n / (div - 1) + 1; div += 6) {
 
@@ -176,13 +165,25 @@ void fillBuffer(uint64_t* data, uint64_t startingBlock, uint32_t blockCount, uin
 
 void printZeros(uint64_t block, int64_t sum, uint64_t offset) {
     int64_t sumF = sum;
-    if(sumF == 0) {
-        printf("%lu %ld\n", offset, sumF);
-    }
     for(uint64_t i = 0; i < 64; i++) {
         sumF += getBit(&block, i) * -2 + 1;
         if(sumF == 0) {
-            printf("%lu %ld\n", offset + i, sumF);
+            printf("%lu %ld zero\n", offset + i, sumF);
+        }
+    }
+}
+
+void printExtremum(uint64_t block, int64_t sum, uint64_t offset, int64_t* minVal, int64_t* maxVal) {
+    int64_t sumF = sum;
+    for(uint64_t i = 0; i < 64; i++) {
+        sumF += getBit(&block, i) * -2 + 1;
+        if(sumF > *maxVal) {
+            printf("%lu %ld max\n", offset + i, sumF);
+            *maxVal = sumF;
+        }
+        if(sumF < *minVal) {
+            printf("%lu %ld min\n", offset + i, sumF);
+            *minVal = sumF;
         }
     }
 }
@@ -207,6 +208,9 @@ int main() {
     tailTable = malloc(TAIL_TABLE_SIZE * sizeof(uint64_t));
 
     int64_t sum = -1; // start at -1 to account for liouville_full(0)
+    int64_t min = INT64_MAX;
+    int64_t max = INT64_MIN;
+
     uint64_t blockCount = 0;
 
     const uint32_t bufferChunkSize = CPU_COUNT * 16384;
@@ -231,6 +235,10 @@ int main() {
         // TODO print minimums and maximums
         if(abs(sum) < 64) {
             printZeros(block, sum, i * 64);
+        }
+
+        if(MAX(sum + 64, max) >= max || MIN(sum - 64, min) <= min) {
+            printExtremum(block, sum, i * 64, &min, &max);
         }
 
         sum += __builtin_popcountll(block) * -2 + 64;
