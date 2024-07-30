@@ -126,6 +126,8 @@ void* threadRoutine(void* arguments) {
             tailTable[absolutePosition] = block;
         }
     }
+
+    return NULL;
 }
 
 

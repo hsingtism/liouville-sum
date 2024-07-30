@@ -12,7 +12,7 @@ See [A002819](https://oeis.org/A002819) on the OEIS. I am not familiar enough wi
 
 ## Primality test
 
-This program uses a table generated with sieve of eratosthenes for numbers up to 2<sup>32</sup>. For values larger than that, up to 2<sup>64</sup>, it uses a function described in [this paper](https://ceur-ws.org/Vol-1326/020-Forisek.pdf) and made avilable [here](https://people.ksp.sk/~misof/primes/). The code is copied to `largePrime/mr.c` with minor modifications. This function is way faster than trial division and with some optimizations, it is slightly slower than the array lookup for values about 10 billion. 
+This program uses a table generated with sieve of eratosthenes for numbers up to 2<sup>32</sup>. For values larger than that, up to 2<sup>64</sup>, it uses a function described in [this paper](https://ceur-ws.org/Vol-1326/020-Forisek.pdf) and made avilable [here](https://people.ksp.sk/~misof/primes/). The code is copied to `largePrimes.c` with minor modifications. This function is way faster than trial division and with some optimizations, it is slightly slower than the array lookup for values about 10 billion. 
 
 ## Compiling
 
