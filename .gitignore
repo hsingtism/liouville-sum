@@ -1,5 +1,5 @@
 *.exe
-.vs 
 .vscode
 graphs
 computed.txt
+test

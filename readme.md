@@ -16,7 +16,7 @@ This program uses a table generated with sieve of eratosthenes for numbers up to
 
 ## Compiling
 
-`pthreads` is required. Although multithreading can be easily disabled by removing a fre blocks of code.
+`pthreads` is required. Although multithreading can be easily disabled by removing a few blocks of code.
 
 `__builtin_popcountll` and `__builtin_ctz` from GCC is used. These can be rewritten quite easily if you're using another compiler.
 
