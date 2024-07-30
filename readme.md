@@ -22,4 +22,12 @@ This program uses a table generated with sieve of eratosthenes for numbers up to
 
 `compile.sh` has the compilation command.
 
+## Memory requirements
+
+**around 9 GB needed** unless you modify something
+
+8 GB is allocated for the "tail table" and about 537 MB is allocated for the primes table. The tail table size can be easily decreased, but this will impact performance at large values. The two big tables combined with the stacks shouldn't take more than 8.6 GB.
+
+If you have to use virtual memory, unless your access times is less than a few microseconds, it'd be slower than a few extra divisions. 
+
 ## (CURRENTLY OUTDATED) Analysis and results computed by me are hosted [here](https://hsing.org/liouville-sum).
