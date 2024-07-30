@@ -174,16 +174,24 @@ void printZeros(uint64_t block, int64_t sum, uint64_t offset) {
 }
 
 void printExtremum(uint64_t block, int64_t sum, uint64_t offset, int64_t* minVal, int64_t* maxVal) {
+
+    static uint64_t lastMinPrint = 0;
+    static uint64_t lastMaxPrint = 0;
+
     int64_t sumF = sum;
     for(uint64_t i = 0; i < 64; i++) {
         sumF += getBit(&block, i) * -2 + 1;
         if(sumF > *maxVal) {
-            printf("%lu %ld max\n", offset + i, sumF);
             *maxVal = sumF;
+            if(offset + i < lastMaxPrint + (1 << 6)) continue;
+            lastMaxPrint = offset + i;
+            printf("%lu %ld max\n", offset + i, sumF);
         }
         if(sumF < *minVal) {
-            printf("%lu %ld min\n", offset + i, sumF);
             *minVal = sumF;
+            if(offset + i < lastMinPrint + (1 << 12)) continue;
+            lastMinPrint = offset + i;
+            printf("%lu %ld min\n", offset + i, sumF);
         }
     }
 }
@@ -218,9 +226,10 @@ int main() {
 
     printf("%jd: all memory allocated\n", (intmax_t)time(NULL));
 
-    // for(uint64_t i = 0; ; i++) {  
-    // for(uint64_t i = 0; i < 15625000; i++) {  
-    for(uint64_t i = 0; i < 156250000; i++) {  
+    uint64_t i = 0;
+    // for(i = 0; ; i++) {  
+    for(i = 0; i < 15625000; i++) {  
+    // for(i = 0; i < 156250000; i++) {  
         if(i % bufferChunkSize == 0) {
             // cannot multithread on first round because table isn't built
             fillBuffer(aggregationBuffer, i, bufferChunkSize, i != 0);
@@ -244,10 +253,10 @@ int main() {
         sum += __builtin_popcountll(block) * -2 + 64;
 
         if((i - 1) % (1 << 20) == 0) {
-            printf("%lu %ld %lx\n", i * 64 + 63, sum, block);
+            printf("%lu %ld periodic\n", i * 64 + 63, sum);
         }
     }
-    printf("%ld\n", sum);
+    printf("%lu %ld final\n", i * 64 - 1, sum);
 
     free(aggregationBuffer);
     free(headTableDivisor);
