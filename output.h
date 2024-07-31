@@ -7,3 +7,4 @@ void printTailTable();
 void printPrimesTable(uint64_t bigPi, uint64_t expectedPi);
 void printStarting();
 void printBlocksFulfilled(uint64_t blockCount, uint32_t chunkSize, uint8_t multithreaded);
+void printEnd();

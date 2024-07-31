@@ -1,6 +1,9 @@
 #include "primes.h"
 #include "bitfieldHelp.h"
 
+#include <stdlib.h>
+#include <pthread.h>
+
 #define PRIME_TABLE_THREAD_COUNT 32
 
 void sieve(uint8_t* table, uint64_t length) {

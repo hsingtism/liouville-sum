@@ -3,6 +3,9 @@
 #include "primes.h"
 #include "maths.h"
 
+#include <pthread.h>
+#include <stdlib.h>
+
 uint64_t* primeBitsU32;
 
 // https://oeis.org/A002110
@@ -190,14 +193,11 @@ int main() {
     printStarting();
 
     // for(i = 0; ; i++) {  
-    for(uint64_t i = 0; i < 15625000; i++) {  
-    // for(i = 0; i < 156250000; i++) {  
-        if(i % bufferChunkSize == 0) {
-            fillBuffer(aggregationBuffer, i, bufferChunkSize, i != 0);
-            blockCount++;
-            printBlocksFulfilled(blockCount, bufferChunkSize, i != 0);
-            manageBuffer(aggregationBuffer, i, bufferChunkSize);
-        }
+    for(uint64_t i = 0; i < 15625000; i += bufferChunkSize) {  
+        fillBuffer(aggregationBuffer, i, bufferChunkSize, i != 0);
+        blockCount++;
+        printBlocksFulfilled(blockCount, bufferChunkSize, i != 0);
+        manageBuffer(aggregationBuffer, i, bufferChunkSize);
     }
 
     free(aggregationBuffer);
@@ -206,5 +206,6 @@ int main() {
     free(tailTable);
     free(primeBitsU32);
 
+    printEnd();
     return 0;
 }

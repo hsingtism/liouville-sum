@@ -20,6 +20,12 @@ grep "min" output.txt | tail
 grep "zero" output.txt -c
 grep "zero" output.txt | head
 grep "zero" output.txt | tail
+grep "repeat0" output.txt -c
+grep "repeat0" output.txt | head
+grep "repeat0" output.txt | tail
+grep "repeat1" output.txt -c
+grep "repeat1" output.txt | head
+grep "repeat1" output.txt | tail
 grep "block" output.txt -c
 grep "block" output.txt | head
 grep "block" output.txt | tail

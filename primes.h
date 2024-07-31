@@ -1,7 +1,4 @@
-#include <stdlib.h>
 #include <stdint.h>
-
-#include <pthread.h>
 
 #define PRIME_BIT_TABLE_LENGTH 1 << 26
 

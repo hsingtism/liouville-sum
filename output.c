@@ -77,3 +77,7 @@ void printBlocksFulfilled(uint64_t blockCount, uint32_t chunkSize, uint8_t multi
     printf("%jd: block %lu with %u values fulfilled. multithreaded: %u\n",
         (intmax_t)time(NULL), blockCount, chunkSize, multithreaded);
 }
+
+void printEnd() {
+    printf("%jd: peaceful termination\n", (intmax_t)time(NULL));
+}
