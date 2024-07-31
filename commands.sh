@@ -1,5 +1,5 @@
-#time ./test
-#./test > output.txt
+#time ./liouville
+#./liouville > output.txt
 #pmap #PID
 
 #!/bin/bash
@@ -7,7 +7,7 @@
 set -x
 pwd
 
-du output.txt test -h
+du output.txt liouville -h
 
 wc -l output.txt
 
