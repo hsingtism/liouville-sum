@@ -1,5 +1,4 @@
-#include <stdio.h>
-
+#include "output.h"
 #include "bitfieldHelp.h"
 #include "primes.h"
 #include "maths.h"
@@ -165,42 +164,9 @@ void fillBuffer(uint64_t* data, uint64_t startingBlock, uint32_t blockCount, uin
     }
 }
 
-void printZeros(uint64_t block, int64_t sum, uint64_t offset) {
-    int64_t sumF = sum;
-    for(uint64_t i = 0; i < 64; i++) {
-        sumF += getBit(&block, i) * -2 + 1;
-        if(sumF == 0) {
-            printf("%lu %ld zero\n", offset + i, sumF);
-        }
-    }
-}
-
-void printExtremum(uint64_t block, int64_t sum, uint64_t offset, int64_t* minVal, int64_t* maxVal) {
-
-    static uint64_t lastMinPrint = 0;
-    static uint64_t lastMaxPrint = 0;
-
-    int64_t sumF = sum;
-    for(uint64_t i = 0; i < 64; i++) {
-        sumF += getBit(&block, i) * -2 + 1;
-        if(sumF > *maxVal) {
-            *maxVal = sumF;
-            if(offset + i < lastMaxPrint + (1 << 6)) continue;
-            lastMaxPrint = offset + i;
-            printf("%lu %ld max\n", offset + i, sumF);
-        }
-        if(sumF < *minVal) {
-            *minVal = sumF;
-            if(offset + i < lastMinPrint + (1 << 12)) continue;
-            lastMinPrint = offset + i;
-            printf("%lu %ld min\n", offset + i, sumF);
-        }
-    }
-}
-
 int main() {
-    printf("%jd: program started\n", (intmax_t)time(NULL));
-    
+    printStart();
+
     headTableDivisor = malloc(HEAD_TABLE_SIZE * sizeof(uint16_t));
     headTableFactor = malloc(HEAD_TABLE_SIZE * sizeof(uint8_t));
 
@@ -208,57 +174,31 @@ int main() {
         headTableDivisor[i] = gcdU16(HEAD_TABLE_SIZE, i);
         headTableFactor[i] = liouville_full(headTableDivisor[i]);
     }
-    printf("%jd: tail table done\n", (intmax_t)time(NULL));
+    printTailTable();
 
 
     primeBitsU32 = primesU32cprs();
-    printf("%jd: prime flags done - %lu primes \n", (intmax_t)time(NULL), bigPIcprs(primeBitsU32, PRIME_BIT_TABLE_LENGTH));
-    printf("the table must contain exactly %u primes\n", PRIME_TABLE_PRIME_COUNT);
+    printPrimesTable(bigPIcprs(primeBitsU32, PRIME_BIT_TABLE_LENGTH), PRIME_TABLE_PRIME_COUNT);
 
     tailTable = malloc(TAIL_TABLE_SIZE * sizeof(uint64_t));
-
-    int64_t sum = -1; // start at -1 to account for liouville_full(0)
-    int64_t min = INT64_MAX;
-    int64_t max = INT64_MIN;
 
     uint64_t blockCount = 0;
 
     const uint32_t bufferChunkSize = CPU_COUNT * 16384;
     uint64_t* aggregationBuffer = malloc(bufferChunkSize * sizeof(uint64_t)); 
 
-    printf("%jd: all memory allocated\n", (intmax_t)time(NULL));
+    printStarting();
 
-    uint64_t i = 0;
     // for(i = 0; ; i++) {  
-    for(i = 0; i < 15625000; i++) {  
+    for(uint64_t i = 0; i < 15625000; i++) {  
     // for(i = 0; i < 156250000; i++) {  
         if(i % bufferChunkSize == 0) {
-            // cannot multithread on first round because table isn't built
             fillBuffer(aggregationBuffer, i, bufferChunkSize, i != 0);
             blockCount++;
-
-            printf("%jd: block %lu with %u values fulfilled. multithreaded: %u\n",
-                (intmax_t)time(NULL), blockCount, bufferChunkSize * 64, i != 0);
-        }
-
-        uint64_t block = aggregationBuffer[i % bufferChunkSize];
-
-        // TODO print minimums and maximums
-        if(abs(sum) < 64) {
-            printZeros(block, sum, i * 64);
-        }
-
-        if(MAX(sum + 64, max) >= max || MIN(sum - 64, min) <= min) {
-            printExtremum(block, sum, i * 64, &min, &max);
-        }
-
-        sum += __builtin_popcountll(block) * -2 + 64;
-
-        if((i - 1) % (1 << 20) == 0) {
-            printf("%lu %ld periodic\n", i * 64 + 63, sum);
+            printBlocksFulfilled(blockCount, bufferChunkSize, i != 0);
+            manageBuffer(aggregationBuffer, i, bufferChunkSize);
         }
     }
-    printf("%lu %ld final\n", i * 64 - 1, sum);
 
     free(aggregationBuffer);
     free(headTableDivisor);
