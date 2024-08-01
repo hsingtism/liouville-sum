@@ -60,7 +60,7 @@ void printStart() {
 }
 
 void printTailTable() {
-    printf("%jd: tail table done\n", (intmax_t)time(NULL));
+    printf("%jd: head table done\n", (intmax_t)time(NULL));
 }
 
 void printPrimesTable(uint64_t bigPi, uint64_t expectedPi) {

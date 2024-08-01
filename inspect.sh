@@ -32,7 +32,7 @@ grep "block" output.txt | tail
 
 grep "primes" output.txt
 
-cat output.txt | head
-cat output.txt | tail
+# head output.txt
+# tail output.txt
 
 echo
