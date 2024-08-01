@@ -1,3 +1,5 @@
+#include "parameters.h"
+
 #include "output.h"
 #include "bitfieldHelp.h"
 #include "primes.h"
@@ -8,13 +10,8 @@
 
 uint64_t* primeBitsU32;
 
-// https://oeis.org/A002110
-#define HEAD_TABLE_SIZE 30030
-
-#define TAIL_TABLE_SIZE (uint64_t)1000000000
+#define HEAD_TABLE_SIZE 30030 // https://oeis.org/A002110
 #define TAIL_TABLE_FIRST_ENTRY 0xa835be21f89e39ac // see tailTableForstEntry.c
-
-#define CPU_COUNT 32
 
 uint16_t* headTableDivisor;
 uint8_t* headTableFactor;
@@ -192,8 +189,7 @@ int main() {
 
     printStarting();
 
-    // for(i = 0; ; i++) {  
-    for(uint64_t i = 0; i < 15625000; i += bufferChunkSize) {  
+    for(uint64_t i = 0; i < MAIN_LOOP_END; i += bufferChunkSize) {  
         fillBuffer(aggregationBuffer, i, bufferChunkSize, i != 0);
         blockCount++;
         printBlocksFulfilled(blockCount, bufferChunkSize, i != 0);
