@@ -5,19 +5,19 @@
 
 void manageBuffer(uint64_t* buffer, uint64_t position, uint32_t blocks) {
 
-    static int64_t sum = -1;
-
-    static int64_t minVal = INT64_MAX;
-    static int64_t maxVal = INT64_MIN;
+    static int64_t sum = 0;
+    static int64_t minVal = 0;
+    static int64_t maxVal = 0;
 
     static uint32_t repeatLength = 0;
-    static uint32_t repeatEntry = 0;
-
+    static uint8_t repeatEntry = 0; 
     static uint32_t repeatRecord0 = 0;
     static uint32_t repeatRecord1 = 0;
 
     for(uint64_t i = 0; i < blocks * 64; i++) {
         uint64_t absolutePosition = i + position * 64;
+        if(absolutePosition == 0) continue;
+        
         uint8_t value = getBit(buffer, i);
 
         sum += value * -2 + 1;

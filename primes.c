@@ -94,18 +94,6 @@ uint8_t* primesU32() {
 }
 
 // ! DO NOT USE "UINT_32_MAX / 64"
-// using the type_MAX constant misses one value, but that value is always
-// composite. using it in the bit table misses 2 primes.
-
-// converting from the byte flag to the bit flag takes about 5-10 seconds
-// but it saves 7/8 memory. Accessing does not add a lot of overhead.
-// TODO maybe find a fast way to do a factor wheel check and map
-// TODO for higher values maybe have a list and do binary search
-// we do need a big initial prime table because a test takes a long time
-// and the nature of the program will benefir from any bigger table
-// as of now, `liouvilleLookup` is effectively doing trial division
-// which will get very slow as n increases. 
-
 // this is done singlethreaded else it might lead to a race condition
 
 uint64_t* primesU32cprs() {
