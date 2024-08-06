@@ -1,18 +1,18 @@
-# This is being reworked on
-
-This project was one of my first programming projects. After two years, I am reworking it. This repo is actively being worked on (see recent commits).
-
-As of now, the time it takes to evaluate 10 billion values has been improved from 406974 seconds to 897 seconds. (The first time was on worse hardware.)
-
 # (CURRENTLY OUTDATED) Analysis and results computed by me are hosted [here](https://hsing.org/liouville-sum).
+
+The code is pretty much finalized. I'm currently computing values; it will be presented on my website when it's done. I may also implement an optimized version for L(n) at a specific spot. 
 
 # Multithreaded Evaluator of the Summatory Liouville Function
 
 This program evalulates the summatory liouville function in blocks of 64 values with two lookup tables. It supports multithreading. 
 
+This was one of my first programming projects in 2021, it has since been greatly improved.
+
 Without any tuning, it can sum to 1 billion (where it disproved the [Polya conjecture](https://en.wikipedia.org/wiki/P%C3%B3lya_conjecture)) in about ~~135~~ ~~44~~ 32 seconds on my laptop with an Intel Core Ultra 7 155H under Windows 11 WSL. (Note that the 32 second time is not optimized for the 1 billion run because it allocates a 64 billion value lookup table and a 2<sup>32</sup> long primes table. It does not include the 14 seconds it takes to compress the primes table and the overhead to blocks bit by bit, it uses the single popcount instruction.) It also sums to 10 billion in 897 seconds. 
 
 See [A002819](https://oeis.org/A002819) on the OEIS. I am not familiar enough with the concept to explain the mathmatical part of it.
+
+**Note:** This program, as you will see below, is designed to evalulate all values of lambda up to a value. If you just want the partial sum at a specific large integer, there are tricks to skip values and speed everything up to less than O(n).
 
 ## Primality test
 
