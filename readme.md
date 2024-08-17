@@ -1,6 +1,6 @@
-# (CURRENTLY OUTDATED) Analysis and results computed by me are hosted [here](https://hsing.org/liouville-sum).
+# Analysis and results computed by me are hosted [here](https://hsing.org/liouville-lambda).
 
-The code is pretty much finalized. I'm currently computing values; it will be presented on my website when it's done. I may also implement an optimized version for L(n) at a specific spot. 
+The code is pretty much finalized. In the future, I may also implement an optimized version for L(n) at a specific spot. 
 
 # Multithreaded Evaluator of the Summatory Liouville Function
 
